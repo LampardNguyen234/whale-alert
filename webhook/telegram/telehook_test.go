@@ -2,7 +2,7 @@ package telegram
 
 import (
 	"fmt"
-	"github.com/LampardNguyen234/whale-alert/common"
+	"github.com/LampardNguyen234/whale-alert/logger"
 	"testing"
 	"time"
 )
@@ -12,15 +12,9 @@ var teleHook *TeleHook
 const numTests = 10
 
 func init() {
-	cfg := &TeleConfig{
-		Token:               "",
-		SubChannels:         []string{""},
-		MessageQueueSize:    1024,
-		EnabledMessageTypes: map[string]bool{common.InfoType: true, common.AlertType: true},
-	}
-
+	cfg := DefaultConfig()
 	var err error
-	teleHook, err = NewTeleHook(*cfg)
+	teleHook, err = NewTeleHook(cfg, logger.NewZeroLogger(""))
 	if err != nil {
 		panic(err)
 	}
