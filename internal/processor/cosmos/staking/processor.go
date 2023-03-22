@@ -2,7 +2,6 @@ package staking
 
 import (
 	"context"
-	"fmt"
 	"github.com/LampardNguyen234/whale-alert/internal/clients/cosmos"
 	"github.com/LampardNguyen234/whale-alert/internal/common"
 	processorCommon "github.com/LampardNguyen234/whale-alert/internal/processor/common"
@@ -103,7 +102,7 @@ func (p *StakingProcessor) processMsgDelegate(ctx context.Context, receipt *sdk.
 	if amtFloat >= p.cfg.MinAmount {
 		err := p.Whm.Alert(DelegateMsg{
 			TxMsg: processorCommon.TxMsg{
-				From:      msg.DelegatorAddress,
+				From:      p.ParseAccountDetail(msg.DelegatorAddress),
 				Amount:    humanize.FtoaWithDigits(amtFloat, 5),
 				Token:     "0x",
 				TokenName: "ASA",
@@ -125,7 +124,7 @@ func (p *StakingProcessor) processMsgUndelegate(ctx context.Context, receipt *sd
 	if amtFloat >= p.cfg.MinAmount {
 		err := p.Whm.Alert(UndelegateMsg{
 			TxMsg: processorCommon.TxMsg{
-				From:      msg.DelegatorAddress,
+				From:      p.ParseAccountDetail(msg.DelegatorAddress),
 				Amount:    humanize.FtoaWithDigits(amtFloat, 5),
 				Token:     "0x",
 				TokenName: "ASA",
@@ -151,27 +150,4 @@ func (p *StakingProcessor) processMsgCreateValidator(_ context.Context, receipt 
 	if err != nil {
 		p.Log.Errorf("failed to processMsgDelegate txHash %v: %v", receipt.TxHash, err)
 	}
-}
-
-func (p *StakingProcessor) getValidatorName(ctx context.Context, valAddr string) string {
-	validatorDetail, err := p.CosmosClient.GetValidatorDetail(ctx, valAddr)
-	if err == nil && validatorDetail.Description.Moniker != "" {
-		return fmt.Sprintf("%v (%v...%v)", validatorDetail.Description.Moniker,
-			valAddr[:12],
-			valAddr[len(valAddr)-12:],
-		)
-	}
-
-	return valAddr
-}
-
-func parseValidatorDetail(valAddr string, desc stakingTypes.Description) string {
-	if desc.Moniker != "" {
-		return fmt.Sprintf("%v (%v...%v)", desc.Moniker,
-			valAddr[:12],
-			valAddr[len(valAddr)-12:],
-		)
-	}
-
-	return valAddr
 }

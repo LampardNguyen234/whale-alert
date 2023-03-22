@@ -18,10 +18,10 @@ type TransferProcessor struct {
 	*processorCommon.BaseProcessor
 	*evm.EvmClient
 	queue chan *types.Receipt
-	cfg   TransferProcessorConfig
+	cfg   UnknownProcessorConfig
 }
 
-func NewTransferProcessor(cfg TransferProcessorConfig,
+func NewTransferProcessor(cfg UnknownProcessorConfig,
 	evmClient *evm.EvmClient,
 	db *store.Store,
 	log logger.Logger,
@@ -97,8 +97,8 @@ func (p *TransferProcessor) Process(ctx context.Context, receipt *types.Receipt)
 
 		return p.Whm.Alert(Msg{
 			processorCommon.TxMsg{
-				From:      p.ParseAccountDetail(from),
-				To:        p.ParseAccountDetail(tx.To().String()),
+				From:      from,
+				To:        tx.To().String(),
 				Amount:    humanize.FtoaWithDigits(amtFloat, 5),
 				Token:     "0x",
 				TokenName: "ASA",

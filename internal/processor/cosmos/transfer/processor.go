@@ -53,33 +53,6 @@ func (p *TransferProcessor) Queue(msg interface{}) {
 	p.queue <- receipt
 }
 
-func (p *TransferProcessor) Process(_ context.Context, receipt *sdk.TxResponse) error {
-	messages := receipt.GetTx().GetMsgs()
-	for _, msg := range messages {
-		tmpMsg, ok := msg.(*bankTypes.MsgSend)
-		if !ok {
-			continue
-		}
-
-		amt := new(big.Float).SetInt(tmpMsg.Amount.AmountOf(cosmos.Denom).BigInt())
-		amt = amt.Quo(amt, new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), common.AsaDecimalsBigInt, nil)))
-		amtFloat, _ := amt.Float64()
-
-		if amtFloat >= p.cfg.MinAmount {
-			return p.Whm.Alert(Msg{
-				From:      tmpMsg.FromAddress,
-				To:        tmpMsg.ToAddress,
-				Amount:    humanize.FtoaWithDigits(amtFloat, 5),
-				Token:     "0x",
-				TokenName: "ASA",
-				TxHash:    receipt.TxHash,
-			}.String())
-		}
-	}
-
-	return nil
-}
-
 func (p *TransferProcessor) Start(ctx context.Context) {
 	p.Log.Infof("STARTED")
 	for {
@@ -96,4 +69,31 @@ func (p *TransferProcessor) Start(ctx context.Context) {
 			time.Sleep(common.DefaultSleepTime)
 		}
 	}
+}
+
+func (p *TransferProcessor) Process(_ context.Context, receipt *sdk.TxResponse) error {
+	messages := receipt.GetTx().GetMsgs()
+	for _, msg := range messages {
+		tmpMsg, ok := msg.(*bankTypes.MsgSend)
+		if !ok {
+			continue
+		}
+
+		amt := new(big.Float).SetInt(tmpMsg.Amount.AmountOf(cosmos.Denom).BigInt())
+		amt = amt.Quo(amt, new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), common.AsaDecimalsBigInt, nil)))
+		amtFloat, _ := amt.Float64()
+
+		if amtFloat >= p.cfg.MinAmount {
+			return p.Whm.Alert(Msg{
+				From:      p.ParseAccountDetail(tmpMsg.FromAddress),
+				To:        p.ParseAccountDetail(tmpMsg.ToAddress),
+				Amount:    humanize.FtoaWithDigits(amtFloat, 5),
+				Token:     "0x",
+				TokenName: "ASA",
+				TxHash:    receipt.TxHash,
+			}.String())
+		}
+	}
+
+	return nil
 }

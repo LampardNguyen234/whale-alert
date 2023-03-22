@@ -3,6 +3,7 @@ package common
 import (
 	"fmt"
 	"github.com/LampardNguyen234/whale-alert/internal/clients/common"
+	"github.com/iancoleman/strcase"
 	"strings"
 )
 
@@ -30,7 +31,7 @@ func (f *MsgFormatter) FormatTitle(title string) *MsgFormatter {
 }
 
 func (f *MsgFormatter) FormatKeyValueMsg(key string, value interface{}) *MsgFormatter {
-	f.resp = f.resp + fmt.Sprintf("%v: %v\n", strings.ToUpper(key), value)
+	f.resp = f.resp + fmt.Sprintf("%v: %v\n", strcase.ToCamel(key), value)
 	return f
 }
 
