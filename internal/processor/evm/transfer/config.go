@@ -1,4 +1,4 @@
-package evm_transfer
+package transfer
 
 import (
 	"fmt"

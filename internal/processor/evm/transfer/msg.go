@@ -1,23 +1,22 @@
-package evm_transfer
+package transfer
 
-import "fmt"
+import (
+	"fmt"
+	processorCommon "github.com/LampardNguyen234/whale-alert/internal/processor/common"
+)
 
 type Msg struct {
-	From      string
-	To        string
-	Amount    string
-	Token     string
-	TokenName string
-	TxHash    string
+	processorCommon.TxMsg
 }
 
 func (msg Msg) String() string {
-	return fmt.Sprintf("%v %vs (%v) has just been transferred from %v to %v. TxHash: %v",
-		msg.Amount,
-		msg.TokenName,
-		msg.Token,
-		msg.From,
-		msg.To,
-		msg.TxHash,
-	)
+	msgFormatter := new(processorCommon.MsgFormatter).
+		FormatTitle("EVM Transfer").
+		FormatKeyValueMsg("From", msg.From).
+		FormatKeyValueMsg("To", msg.To).
+		FormatKeyValueMsg("Amount", msg.Amount).
+		FormatKeyValueMsg("Token", fmt.Sprintf("%v (%v)", msg.TokenName, msg.Token)).
+		FormatKeyValueMsg("TxHash", processorCommon.FormatTxURL(msg.TxHash))
+
+	return msgFormatter.String()
 }

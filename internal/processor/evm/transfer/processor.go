@@ -7,7 +7,6 @@ import (
 	processorCommon "github.com/LampardNguyen234/whale-alert/internal/processor/common"
 	"github.com/LampardNguyen234/whale-alert/internal/store"
 	"github.com/LampardNguyen234/whale-alert/logger"
-	"github.com/LampardNguyen234/whale-alert/webhook"
 	"github.com/dustin/go-humanize"
 	"github.com/ethereum/go-ethereum/core/types"
 	"math/big"
@@ -30,17 +29,13 @@ func NewTransferProcessor(cfg TransferProcessorConfig,
 	return &TransferProcessor{
 		BaseProcessor: &processorCommon.BaseProcessor{
 			Db:  db,
-			Log: log,
+			Log: log.WithPrefix("Evm-transfer"),
 			Mtx: new(sync.Mutex),
 		},
 		EvmClient: evmClient,
 		queue:     make(chan *types.Receipt, cfg.QueueSize),
 		cfg:       cfg,
 	}, nil
-}
-
-func (p *TransferProcessor) SetWebHookManager(whm webhook.WebHookManager) {
-	p.Whm = whm
 }
 
 func (p *TransferProcessor) Queue(msg interface{}) {
@@ -52,6 +47,24 @@ func (p *TransferProcessor) Queue(msg interface{}) {
 	p.Mtx.Lock()
 	defer p.Mtx.Unlock()
 	p.queue <- receipt
+}
+
+func (p *TransferProcessor) Start(ctx context.Context) {
+	p.Log.Infof("STARTED")
+	for {
+		select {
+		case <-ctx.Done():
+			p.Log.Infof("STOPPED")
+			return
+		case receipt := <-p.queue:
+			err := p.Process(ctx, receipt)
+			if err != nil {
+				p.Log.Errorf("failed to process receipt %v: %v", receipt, err)
+			}
+		default:
+			time.Sleep(common.DefaultSleepTime)
+		}
+	}
 }
 
 func (p *TransferProcessor) Process(ctx context.Context, receipt *types.Receipt) error {
@@ -72,7 +85,7 @@ func (p *TransferProcessor) Process(ctx context.Context, receipt *types.Receipt)
 	amt = amt.Quo(amt, new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), common.AsaDecimalsBigInt, nil)))
 	amtFloat, _ := amt.Float64()
 
-	if triggerredAmt, ok := p.cfg.WhaleDefinition[common.AsaAddress]; ok && amtFloat > triggerredAmt {
+	if triggerredAmt, ok := p.cfg.WhaleDefinition[common.AsaAddress]; ok && amtFloat >= triggerredAmt {
 		from := ""
 		p.Log.Debugf("chainID: %v", tx.ChainId())
 		signer, err := types.Sender(types.LatestSignerForChainID(tx.ChainId()), tx)
@@ -83,31 +96,16 @@ func (p *TransferProcessor) Process(ctx context.Context, receipt *types.Receipt)
 		}
 
 		return p.Whm.Alert(Msg{
-			From:      from,
-			To:        tx.To().String(),
-			Amount:    humanize.FtoaWithDigits(amtFloat, 5),
-			Token:     "0x",
-			TokenName: "ASA",
-			TxHash:    receipt.TxHash.String(),
+			processorCommon.TxMsg{
+				From:      from,
+				To:        tx.To().String(),
+				Amount:    humanize.FtoaWithDigits(amtFloat, 5),
+				Token:     "0x",
+				TokenName: "ASA",
+				TxHash:    receipt.TxHash.String(),
+			},
 		}.String())
 	}
 
 	return nil
-}
-
-func (p *TransferProcessor) Start(ctx context.Context) {
-	for {
-		select {
-		case <-ctx.Done():
-			p.Log.Infof("TransferProcessor STOPPED")
-			return
-		case receipt := <-p.queue:
-			err := p.Process(ctx, receipt)
-			if err != nil {
-				p.Log.Errorf("failed to process receipt %v: %v", receipt, err)
-			}
-		default:
-			time.Sleep(common.DefaultSleepTime)
-		}
-	}
 }
