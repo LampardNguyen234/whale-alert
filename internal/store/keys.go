@@ -13,18 +13,18 @@ const (
 	lastBlkKey = iota
 	processedTxKey
 	tokenDetailKey
+	addressDetailKey
 )
 
 func makePrefix(keyPrefix int) []byte {
 	res := crypto.Keccak256([]byte(fmt.Sprintf("%v", keyPrefix)))
-	res = append(res[:keyPrefixLength], make([]byte, 32-keyPrefixLength)...)
-	return res
+	return res[:keyPrefixLength]
 }
 
 func makeKey(keyPrefix int, aux ...byte) []byte {
 	res := makePrefix(keyPrefix)
 	if len(aux) > 0 {
-		res = append(res[:keyPrefixLength], crypto.Keccak256(aux)[:32-keyPrefixLength]...)
+		res = append(res, crypto.Keccak256(aux)[:32-keyPrefixLength]...)
 	}
 	return res
 }

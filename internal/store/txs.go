@@ -2,7 +2,6 @@ package store
 
 // StoreProcessedTx marks the given txHash as processed.
 func (s *Store) StoreProcessedTx(txHash []byte) error {
-
 	return s.db.SetByKey(makeKey(processedTxKey, txHash...), []byte{1})
 }
 
