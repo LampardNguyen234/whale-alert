@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/LampardNguyen234/whale-alert/config"
 	"github.com/LampardNguyen234/whale-alert/db"
+	"github.com/LampardNguyen234/whale-alert/internal/api"
 	"github.com/LampardNguyen234/whale-alert/internal/clients"
 	"github.com/LampardNguyen234/whale-alert/internal/listener"
 	"github.com/LampardNguyen234/whale-alert/internal/processor"
@@ -17,9 +18,10 @@ import (
 
 // App is the main application of the project.
 type App struct {
-	log      logger.Logger
-	listener *listener.Listener
-	whm      *webhook.WebHookManager
+	log        logger.Logger
+	listener   *listener.Listener
+	whm        *webhook.WebHookManager
+	httpServer *api.HTTPServer
 }
 
 // NewApp creates a new main application.
@@ -63,10 +65,16 @@ func NewApp(cfg *config.Config) (*App, error) {
 		return nil, err
 	}
 
+	httpServer, err := api.NewHTTPServer(tmpStore, log)
+	if err != nil {
+		return nil, err
+	}
+
 	return &App{
-		log:      log.WithPrefix("App"),
-		listener: tmpListener,
-		whm:      whm,
+		log:        log.WithPrefix("App"),
+		listener:   tmpListener,
+		whm:        whm,
+		httpServer: httpServer,
 	}, nil
 }
 
@@ -77,6 +85,7 @@ func (app *App) Start(ctx context.Context) {
 		return
 	}
 	go app.listener.Start(ctx)
+	go app.httpServer.Start(ctx)
 
 	sysErr := make(chan os.Signal, 1)
 	signal.Notify(sysErr,
