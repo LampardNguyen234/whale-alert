@@ -1,0 +1,74 @@
+{
+  "Logger": {
+    "LogPath": "",
+    "Level": 1,
+    "Color": false
+  },
+  "Webhooks": {
+    "Discord": {
+      "Token": "DISCORD_TOKEN",
+      "SubChannels": [
+        "CHANNEL_ID_0",
+        "CHANNEL_ID_1"
+      ],
+      "MessageQueueSize": 1024,
+      "EnabledMessageTypes": {
+        "Alert": true,
+        "Info": true
+      }
+    },
+    "Telegram": {
+      "Token": "TELEGRAM_BOT_TOKEN",
+      "SubChannels": [
+        "@CHANNEL_0",
+        "@CHANNEL_1"
+      ],
+      "MessageQueueSize": 1024,
+      "EnabledMessageTypes": {
+        "Alert": true,
+        "Info": true
+      }
+    }
+  },
+  "Clients": {
+    "Evm": {
+      "Endpoint": "ws://127.0.0.1:8546",
+      "Enabled": true
+    },
+    "Cosmos": {
+      "Endpoint": "http://127.0.0.1",
+      "GrpcPort": "9090",
+      "TendermintPort": "26657",
+      "Prefix": "astra",
+      "ChainID": "astra-11115_1",
+      "Enabled": false
+    }
+  },
+  "LevelDB": {
+    "Path": "./data"
+  },
+  "Listener": {
+    "StartBlock": 0
+  },
+  "Processors": {
+    "EvmTransfer": {
+      "Enabled": true,
+      "QueueSize": 1024,
+      "WhaleDefinition": {
+        "0x0000000000000000000000000000000000000000": 100
+      }
+    },
+    "Cosmos": {
+      "Transfer": {
+        "Enabled": true,
+        "QueueSize": 1024,
+        "MinAmount": 100
+      },
+      "Staking": {
+        "Enabled": true,
+        "QueueSize": 1024,
+        "MinAmount": 0
+      }
+    }
+  }
+}
