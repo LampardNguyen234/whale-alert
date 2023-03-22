@@ -32,5 +32,7 @@ func NewClientsFromConfig(cfg ClientsConfig, store *store.Store, log logger.Logg
 		ret[common.CosmosClientName] = cosmosClient
 	}
 
+	common.InitExplorer(cfg.Cosmos.ChainID)
+
 	return ret, nil
 }

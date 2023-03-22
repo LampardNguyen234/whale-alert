@@ -3,6 +3,7 @@ package evm
 import (
 	"context"
 	clientCommon "github.com/LampardNguyen234/whale-alert/internal/clients/common"
+	internalCommon "github.com/LampardNguyen234/whale-alert/internal/common"
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"
 	"time"
@@ -31,14 +32,14 @@ func (c *EvmClient) ListenToTxs(ctx context.Context, txResult chan interface{}, 
 			head, err := c.LatestBlockHeight(ctx)
 			if err != nil {
 				c.log.Error("Unable to get latest block")
-				time.Sleep(blockRetryInterval)
+				time.Sleep(internalCommon.DefaultSleepTime)
 				continue
 			}
 			if startBlk == nil || startBlk.Cmp(new(big.Int).SetUint64(0)) <= 0 {
 				startBlk = big.NewInt(head.Int64())
 			}
 			if head.Cmp(startBlk) < 0 {
-				time.Sleep(blockRetryInterval)
+				time.Sleep(internalCommon.DefaultSleepTime)
 				continue
 			}
 

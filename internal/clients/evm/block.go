@@ -18,13 +18,13 @@ func (c *EvmClient) LatestBlockHeight(ctx context.Context) (*big.Int, error) {
 
 // BlockTxsByHeight retrieves the receipts of all transaction in a block given its height.
 func (c *EvmClient) BlockTxsByHeight(ctx context.Context, blk *big.Int) ([]*types.Receipt, error) {
-	latestBlock, err := c.Client.BlockByNumber(ctx, blk)
+	block, err := c.Client.BlockByNumber(ctx, blk)
 	if err != nil {
 		return nil, err
 	}
 
 	res := make([]*types.Receipt, 0)
-	for _, tx := range latestBlock.Transactions() {
+	for _, tx := range block.Transactions() {
 		receipt, err := c.TransactionReceipt(ctx, tx.Hash())
 		if err != nil {
 			c.log.Errorf("failed to get transaction receipt of %v: %v", tx.Hash(), err)

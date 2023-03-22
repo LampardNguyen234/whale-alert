@@ -9,7 +9,8 @@ type EvmClientConfig struct {
 
 func DefaultConfig() EvmClientConfig {
 	return EvmClientConfig{
-		Endpoint: "http://127.0.0.1:8544",
+		//Endpoint: "http://127.0.0.1:8544",
+		Endpoint: "ws://206.189.158.191:8546",
 		Enabled:  true,
 	}
 }
