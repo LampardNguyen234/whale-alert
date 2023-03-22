@@ -4,4 +4,4 @@ run:
 build-app:
 	go build -o wa
 clean:
-	rm -f ns && go clean --modcache && go mod tidy
+	rm -f wa && go clean --modcache && go mod tidy
