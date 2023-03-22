@@ -1,33 +1,28 @@
 package processor
 
 import (
-	"context"
 	"github.com/LampardNguyen234/whale-alert/internal/clients"
 	"github.com/LampardNguyen234/whale-alert/internal/clients/common"
+	"github.com/LampardNguyen234/whale-alert/internal/clients/cosmos"
 	"github.com/LampardNguyen234/whale-alert/internal/clients/evm"
-	"github.com/LampardNguyen234/whale-alert/internal/processor/evm_transfer"
+	processorCommon "github.com/LampardNguyen234/whale-alert/internal/processor/common"
+	cosmosProcessor "github.com/LampardNguyen234/whale-alert/internal/processor/cosmos"
+	evmTransfer "github.com/LampardNguyen234/whale-alert/internal/processor/evm/transfer"
 	"github.com/LampardNguyen234/whale-alert/internal/store"
 	"github.com/LampardNguyen234/whale-alert/logger"
-	"github.com/LampardNguyen234/whale-alert/webhook"
 )
-
-type Processor interface {
-	Queue(interface{})
-	Start(context.Context)
-	SetWebHookManager(manager webhook.WebHookManager)
-}
 
 func NewProcessors(cfg ProcessorsConfig,
 	blkClients map[string]clients.Client,
 	db *store.Store,
 	log logger.Logger,
-) ([]Processor, error) {
-	ret := make([]Processor, 0)
+) ([]processorCommon.Processor, error) {
+	ret := make([]processorCommon.Processor, 0)
 
 	if client, ok := blkClients[common.EvmClientName]; ok {
-		evmClient := client.(*evm.EvmClient)
+		tmpClient := client.(*evm.EvmClient)
 		if cfg.EvmTransfer.Enabled {
-			p, err := evm_transfer.NewTransferProcessor(cfg.EvmTransfer, evmClient, db, log)
+			p, err := evmTransfer.NewTransferProcessor(cfg.EvmTransfer, tmpClient, db, log)
 			if err != nil {
 				return nil, err
 			}
@@ -35,6 +30,16 @@ func NewProcessors(cfg ProcessorsConfig,
 			ret = append(ret, p)
 		}
 
+	}
+
+	if client, ok := blkClients[common.CosmosClientName]; ok {
+		tmpClient := client.(*cosmos.CosmosClient)
+		cosmosProcessors, err := cosmosProcessor.NewProcessors(cfg.Cosmos, tmpClient, db, log)
+		if err != nil {
+			return nil, err
+		}
+
+		ret = append(ret, cosmosProcessors...)
 	}
 
 	return ret, nil

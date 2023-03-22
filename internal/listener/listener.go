@@ -2,11 +2,10 @@ package listener
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/LampardNguyen234/whale-alert/internal/clients"
 	clientsCommon "github.com/LampardNguyen234/whale-alert/internal/clients/common"
 	"github.com/LampardNguyen234/whale-alert/internal/common"
-	"github.com/LampardNguyen234/whale-alert/internal/processor"
+	processorCommon "github.com/LampardNguyen234/whale-alert/internal/processor/common"
 	"github.com/LampardNguyen234/whale-alert/internal/store"
 	"github.com/LampardNguyen234/whale-alert/logger"
 	"github.com/LampardNguyen234/whale-alert/webhook"
@@ -17,7 +16,7 @@ import (
 
 type Listener struct {
 	clients    map[string]clients.Client
-	processors []processor.Processor
+	processors []processorCommon.Processor
 	db         *store.Store
 	log        logger.Logger
 	whm        webhook.WebHookManager
@@ -26,7 +25,7 @@ type Listener struct {
 }
 
 // NewListener creates a new listener.
-func NewListener(cfg ListenerConfig, clients map[string]clients.Client, processors []processor.Processor, db *store.Store, log logger.Logger, whm webhook.WebHookManager) (*Listener, error) {
+func NewListener(cfg ListenerConfig, clients map[string]clients.Client, processors []processorCommon.Processor, db *store.Store, log logger.Logger, whm webhook.WebHookManager) (*Listener, error) {
 	return &Listener{
 		clients:    clients,
 		processors: processors,
@@ -61,6 +60,8 @@ func (l *Listener) Start(ctx context.Context) {
 	for _, c := range l.clients {
 		go c.ListenToTxs(ctx, resultChan, startBlock)
 	}
+
+	l.log.Infof("STARTED")
 	for {
 		select {
 		case <-ctx.Done():
@@ -74,8 +75,7 @@ func (l *Listener) Start(ctx context.Context) {
 			for _, p := range l.processors {
 				go p.Queue(msg)
 			}
-			jsb, _ := json.Marshal(msg)
-			l.log.Infof("new msg: %v", string(jsb))
+			//l.log.Debugf("new msg: %v", msg)
 		default:
 			time.Sleep(common.DefaultSleepTime)
 		}
