@@ -1,0 +1,72 @@
+definitions:
+  request.APIUpdateAccountDetail:
+    properties:
+      address:
+        description: Address is either an EVM or Cosmos address of the account.
+        type: string
+      name:
+        description: Name is the identity of the account.
+        type: string
+    required:
+    - address
+    - name
+    type: object
+  response.APIResponse:
+    properties:
+      data: {}
+      error:
+        type: string
+    type: object
+info:
+  contact:
+    email: support@stellalab.com
+    name: StellaLab
+    url: https://www.stellalab.com
+  description: This service is dedicated to administration of a Whale Alert service.
+  title: Whale Alert Admin APIs
+  version: "1.0"
+paths:
+  /admin/account/all:
+    get:
+      consumes:
+      - application/json
+      description: Check the status of a message given its ID.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Message Status
+  /admin/account/update:
+    post:
+      consumes:
+      - application/json
+      description: Store the detail of an account
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.APIUpdateAccountDetail'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update Account Detail
+securityDefinitions:
+  ApiKeyAuth:
+    description: Use for admin authorization
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
