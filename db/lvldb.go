@@ -6,7 +6,7 @@ import (
 )
 
 type LevelDB struct {
-	db *leveldb.DB
+	*leveldb.DB
 }
 
 // NewLvlDB returns a new LevelDB instance.
@@ -15,17 +15,17 @@ func NewLvlDB(path string) (*LevelDB, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "levelDB.OpenFile fail")
 	}
-	return &LevelDB{db: ldb}, nil
+	return &LevelDB{DB: ldb}, nil
 }
 
 func (db *LevelDB) GetByKey(key []byte) ([]byte, error) {
-	return db.db.Get(key, nil)
+	return db.DB.Get(key, nil)
 }
 
 func (db *LevelDB) SetByKey(key []byte, value []byte) error {
-	return db.db.Put(key, value, nil)
+	return db.DB.Put(key, value, nil)
 }
 
 func (db *LevelDB) Close() error {
-	return db.db.Close()
+	return db.DB.Close()
 }
