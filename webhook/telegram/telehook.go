@@ -120,7 +120,7 @@ func (t *TeleHook) handleUpdateChan() {
 			t.mtx.Unlock()
 			break
 		case msg := <-t.updateChannel:
-			t.log.Infof("New message received: %v", common.MustFormatJson(msg))
+			t.log.Debugf("New message received: %v", common.MustFormatJson(msg))
 			for _, subChannel := range t.cfg.SubChannels {
 				var chattableMsg tgbotapi.Chattable
 				msgStr, ok := msg.(string)
