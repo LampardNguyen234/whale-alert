@@ -21,6 +21,7 @@ func InitExplorer(chainID string) {
 			ExplorerUrl: "https://explorer.astranaut.io",
 			PingPubURL:  "https://ping.astranaut.io/astra",
 		}
+		return
 	}
 
 	Explorer = ExplorerDetail{
