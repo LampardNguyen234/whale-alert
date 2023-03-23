@@ -16,6 +16,11 @@ var (
 func (c *EvmClient) ListenToTxs(ctx context.Context, txResult chan interface{}, startBlk *big.Int) {
 	txHashChan := make(chan common.Hash)
 	go c.subscribePendingTxs(ctx, txHashChan)
+
+	var currentBlk *big.Int
+	if startBlk != nil {
+		currentBlk = new(big.Int).SetUint64(startBlk.Uint64())
+	}
 	for {
 		select {
 		case <-ctx.Done():
@@ -35,32 +40,32 @@ func (c *EvmClient) ListenToTxs(ctx context.Context, txResult chan interface{}, 
 				time.Sleep(internalCommon.DefaultSleepTime)
 				continue
 			}
-			if startBlk == nil || startBlk.Cmp(new(big.Int).SetUint64(0)) <= 0 {
-				startBlk = big.NewInt(head.Int64())
+			if currentBlk == nil || currentBlk.Cmp(new(big.Int).SetUint64(0)) <= 0 {
+				currentBlk = big.NewInt(head.Int64())
 			}
-			if head.Cmp(startBlk) < 0 {
+			if head.Cmp(currentBlk) < 0 {
 				time.Sleep(internalCommon.DefaultSleepTime)
 				continue
 			}
 
-			txs, err := c.BlockTxsByHeight(ctx, startBlk)
+			txs, err := c.BlockTxsByHeight(ctx, currentBlk)
 			if err != nil {
-				c.log.Errorf("failed to get blockTxsByHeight(%v): %v", startBlk.Uint64(), err)
+				c.log.Errorf("failed to get blockTxsByHeight(%v): %v", currentBlk.Uint64(), err)
 				continue
 			}
 			for _, tx := range txs {
 				txResult <- tx
 			}
 
-			err = c.store.StoreLastBlock(startBlk, clientCommon.EvmClientID)
+			err = c.store.StoreLastBlock(currentBlk, clientCommon.EvmClientID)
 			if err != nil {
-				c.log.Errorf("failed to storeLastBlock(%v): %v", startBlk.Uint64(), err)
+				c.log.Errorf("failed to storeLastBlock(%v): %v", currentBlk.Uint64(), err)
 			}
 
-			if startBlk.Uint64()%10 == 0 {
-				c.log.Debugf("ListenToTxs finished block %v", startBlk.Uint64())
+			if currentBlk.Uint64()%100 == 0 {
+				c.log.Debugf("ListenToTxs finished block %v", currentBlk.Uint64())
 			}
-			startBlk = startBlk.Add(startBlk, big.NewInt(1))
+			currentBlk = currentBlk.Add(currentBlk, big.NewInt(1))
 		}
 	}
 }
