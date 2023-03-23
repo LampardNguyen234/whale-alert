@@ -30,15 +30,6 @@ func NewCosmosClient(cfg CosmosClientConfig, store *store.Store, log logger.Logg
 		return nil, err
 	}
 
-	grpcClient, err := grpc.Dial(
-		makeGrpcURL(fmt.Sprintf("%v:%v", cfg.Endpoint, cfg.GrpcPort)),
-		grpc.WithInsecure(),
-	)
-	if err != nil {
-		fmt.Println("1")
-		return nil, err
-	}
-
 	initSdkConfig(cfg)
 	encCfg := encoding.MakeConfig(app.ModuleBasics)
 	rpcHttp, err := http.New(fmt.Sprintf("%v:%v", cfg.Endpoint, cfg.TendermintPort), "/websocket")
@@ -54,7 +45,6 @@ func NewCosmosClient(cfg CosmosClientConfig, store *store.Store, log logger.Logg
 
 	baseClient := &BaseClient{
 		Context: clientCtx,
-		grpc:    grpcClient,
 	}
 	tmpLog := log.WithPrefix("Cosmos-client")
 
@@ -62,7 +52,7 @@ func NewCosmosClient(cfg CosmosClientConfig, store *store.Store, log logger.Logg
 		BaseClient:    baseClient,
 		store:         store,
 		log:           tmpLog,
-		BankClient:    NewBankClient(grpcClient),
-		StakingClient: NewStakingClient(grpcClient),
+		BankClient:    NewBankClient(baseClient.Context),
+		StakingClient: NewStakingClient(baseClient.Context),
 	}, nil
 }

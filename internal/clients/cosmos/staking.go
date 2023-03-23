@@ -3,14 +3,14 @@ package cosmos
 import (
 	"context"
 	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"google.golang.org/grpc"
+	"github.com/gogo/protobuf/grpc"
 )
 
 type StakingClient struct {
 	stakingTypes.QueryClient
 }
 
-func NewStakingClient(conn *grpc.ClientConn) StakingClient {
+func NewStakingClient(conn grpc.ClientConn) StakingClient {
 	return StakingClient{
 		QueryClient: stakingTypes.NewQueryClient(conn),
 	}
