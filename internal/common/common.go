@@ -9,7 +9,7 @@ import (
 const (
 	AsaDecimals      = 18
 	DefaultSleepTime = 2 * time.Second
-	AsaAddress       = "0x0000000000000000000000000000000000000000"
+	AsaAddress       = "0x"
 	DecimalDigits    = 5
 )
 
