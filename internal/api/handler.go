@@ -72,8 +72,9 @@ func (s *HTTPServer) apiUpdateAccountDetail(c *gin.Context) {
 
 	go func() {
 		d := store.AccountDetail{
-			Address: addr,
-			Name:    req.Name,
+			Address:   addr,
+			Name:      req.Name,
+			Monitored: req.Monitored,
 		}
 		err = s.db.StoreAccountDetail(d)
 		if err != nil {
