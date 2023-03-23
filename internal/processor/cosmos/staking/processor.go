@@ -72,20 +72,18 @@ func (p *StakingProcessor) Start(ctx context.Context) {
 func (p *StakingProcessor) Process(ctx context.Context, receipt *sdk.TxResponse) error {
 	messages := receipt.GetTx().GetMsgs()
 	for _, msg := range messages {
-		tmpMsgDelegate, ok := msg.(*stakingTypes.MsgDelegate)
-		if ok {
+		switch msg.(type) {
+		case *stakingTypes.MsgDelegate:
+			tmpMsgDelegate := msg.(*stakingTypes.MsgDelegate)
 			go p.processMsgDelegate(ctx, receipt, tmpMsgDelegate)
-			continue
-		}
-
-		tmpMsgUndelegate, ok := msg.(*stakingTypes.MsgUndelegate)
-		if ok {
+		case *stakingTypes.MsgUndelegate:
+			tmpMsgUndelegate := msg.(*stakingTypes.MsgUndelegate)
 			go p.processMsgUndelegate(ctx, receipt, tmpMsgUndelegate)
-		}
-
-		tmpMsgCreateValidator, ok := msg.(*stakingTypes.MsgCreateValidator)
-		if ok {
+		case *stakingTypes.MsgCreateValidator:
+			tmpMsgCreateValidator := msg.(*stakingTypes.MsgCreateValidator)
 			go p.processMsgCreateValidator(ctx, receipt, tmpMsgCreateValidator)
+		default:
+			return nil
 		}
 	}
 
@@ -135,7 +133,7 @@ func (p *StakingProcessor) processMsgCreateValidator(_ context.Context, receipt 
 		TxMsg: processorCommon.TxMsg{
 			TxHash: receipt.TxHash,
 		},
-		Address:    msg.ValidatorAddress,
+		Address:    parseValidatorDetail(msg.ValidatorAddress, msg.Description),
 		Name:       msg.Description.Moniker,
 		Commission: msg.Commission.Rate.MustFloat64(),
 	}.String())
