@@ -16,6 +16,10 @@ const (
 var AsaDecimalsBigInt = big.NewInt(AsaDecimals)
 
 func GetNormalizedValue(rawValue *big.Int, decimals ...int) float64 {
+	if rawValue == nil {
+		return 0
+	}
+
 	decimalBigInt := AsaDecimalsBigInt
 	if len(decimals) > 0 {
 		decimalBigInt = new(big.Int).SetInt64(int64(decimals[0]))
