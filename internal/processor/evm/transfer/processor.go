@@ -7,9 +7,7 @@ import (
 	processorCommon "github.com/LampardNguyen234/whale-alert/internal/processor/common"
 	"github.com/LampardNguyen234/whale-alert/internal/store"
 	"github.com/LampardNguyen234/whale-alert/logger"
-	"github.com/dustin/go-humanize"
 	"github.com/ethereum/go-ethereum/core/types"
-	"math/big"
 	"sync"
 	"time"
 )
@@ -81,10 +79,7 @@ func (p *TransferProcessor) Process(ctx context.Context, receipt *types.Receipt)
 		return err
 	}
 
-	amt := new(big.Float).SetInt(tx.Value())
-	amt = amt.Quo(amt, new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), common.AsaDecimalsBigInt, nil)))
-	amtFloat, _ := amt.Float64()
-
+	amtFloat := common.GetNormalizedValue(tx.Value())
 	if triggerredAmt, ok := p.cfg.WhaleDefinition[common.AsaAddress]; ok && amtFloat >= triggerredAmt {
 		from := ""
 		p.Log.Debugf("chainID: %v", tx.ChainId())
@@ -99,7 +94,7 @@ func (p *TransferProcessor) Process(ctx context.Context, receipt *types.Receipt)
 			processorCommon.TxMsg{
 				From:      p.ParseAccountDetail(from),
 				To:        p.ParseAccountDetail(tx.To().String()),
-				Amount:    humanize.FtoaWithDigits(amtFloat, 5),
+				Amount:    common.FormatAmount(amtFloat),
 				Token:     "0x",
 				TokenName: "ASA",
 				TxHash:    receipt.TxHash.String(),

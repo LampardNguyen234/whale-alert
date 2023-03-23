@@ -9,8 +9,6 @@ import (
 	"github.com/LampardNguyen234/whale-alert/logger"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bankTypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/dustin/go-humanize"
-	"math/big"
 	"sync"
 	"time"
 )
@@ -79,19 +77,19 @@ func (p *TransferProcessor) Process(_ context.Context, receipt *sdk.TxResponse) 
 			continue
 		}
 
-		amt := new(big.Float).SetInt(tmpMsg.Amount.AmountOf(cosmos.Denom).BigInt())
-		amt = amt.Quo(amt, new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), common.AsaDecimalsBigInt, nil)))
-		amtFloat, _ := amt.Float64()
-
+		amtFloat := common.GetNormalizedValue(tmpMsg.Amount.AmountOf(cosmos.Denom).BigInt())
 		if amtFloat >= p.cfg.MinAmount {
-			return p.Whm.Alert(Msg{
+			err := p.Whm.Alert(Msg{
 				From:      p.ParseAccountDetail(tmpMsg.FromAddress),
 				To:        p.ParseAccountDetail(tmpMsg.ToAddress),
-				Amount:    humanize.FtoaWithDigits(amtFloat, 5),
+				Amount:    common.FormatAmount(amtFloat),
 				Token:     "0x",
 				TokenName: "ASA",
 				TxHash:    receipt.TxHash,
 			}.String())
+			if err != nil {
+				return err
+			}
 		}
 	}
 

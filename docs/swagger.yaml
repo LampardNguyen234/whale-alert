@@ -4,6 +4,9 @@ definitions:
       address:
         description: Address is either an EVM or Cosmos address of the account.
         type: string
+      monitored:
+        description: Monitored indicates whether the service should monitor this account.
+        type: boolean
       name:
         description: Name is the identity of the account.
         type: string
@@ -30,7 +33,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Check the status of a message given its ID.
+      description: Get all stored account details.
       produces:
       - application/json
       responses:
@@ -40,7 +43,22 @@ paths:
             $ref: '#/definitions/response.APIResponse'
       security:
       - ApiKeyAuth: []
-      summary: Message Status
+      summary: Get all account details
+  /admin/account/all-monitored:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all the monitored accounts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all monitored accounts
   /admin/account/update:
     post:
       consumes:

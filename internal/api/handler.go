@@ -27,6 +27,7 @@ func (s *HTTPServer) startHandler() {
 	accountGroup := adminGroup.Group("/account")
 	accountGroup.POST("/update", s.APIAuthenticateHandler(), s.apiUpdateAccountDetail)
 	accountGroup.GET("/all", s.APIAuthenticateHandler(), s.apiGetAllAccountDetail)
+	accountGroup.GET("/all-monitored", s.APIAuthenticateHandler(), s.apiGetAllMonitoredAccounts)
 
 	err := s.Engine.Run("0.0.0.0:12321")
 	if err != nil {
@@ -84,8 +85,8 @@ func (s *HTTPServer) apiUpdateAccountDetail(c *gin.Context) {
 }
 
 // apiGetAllAccountDetail godoc
-// @Summary Message Status
-// @Description Check the status of a message given its ID.
+// @Summary Get all account details
+// @Description Get all stored account details.
 // @Accept json
 // @Produce json
 // @Success 200 {object} response.APIResponse.
@@ -100,6 +101,33 @@ func (s *HTTPServer) apiGetAllAccountDetail(c *gin.Context) {
 	}()
 
 	allAccounts, err := s.db.GetAllAccountDetails()
+	if err != nil {
+		s.log.Errorf("failed to GetAllAccountDetails: %v", err)
+		statusCode = http.StatusBadRequest
+		err = fmt.Errorf("internal server error")
+		return
+	}
+
+	resp.Result = allAccounts
+}
+
+// apiGetAllMonitoredAccounts godoc
+// @Summary Get all monitored accounts
+// @Description Retrieve all the monitored accounts
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.APIResponse.
+// @Security ApiKeyAuth
+// @Router  /admin/account/all-monitored [get]
+func (s *HTTPServer) apiGetAllMonitoredAccounts(c *gin.Context) {
+	var err error
+	statusCode := http.StatusOK
+	resp := response.APIAllMonitoredAccountResponse{}
+	defer func() {
+		c.JSON(statusCode, response.NewAPIJSONResponse(c, resp, err))
+	}()
+
+	allAccounts, err := s.db.GetAllMonitoredAccounts()
 	if err != nil {
 		s.log.Errorf("failed to GetAllAccountDetails: %v", err)
 		statusCode = http.StatusBadRequest

@@ -26,14 +26,39 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Check the status of a message given its ID.",
+                "description": "Get all stored account details.",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Message Status",
+                "summary": "Get all account details",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/account/all-monitored": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve all the monitored accounts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get all monitored accounts",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -92,6 +117,10 @@ const docTemplate = `{
                 "address": {
                     "description": "Address is either an EVM or Cosmos address of the account.",
                     "type": "string"
+                },
+                "monitored": {
+                    "description": "Monitored indicates whether the service should monitor this account.",
+                    "type": "boolean"
                 },
                 "name": {
                     "description": "Name is the identity of the account.",

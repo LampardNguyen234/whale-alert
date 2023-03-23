@@ -9,8 +9,6 @@ import (
 	"github.com/LampardNguyen234/whale-alert/logger"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/dustin/go-humanize"
-	"math/big"
 	"sync"
 	"time"
 )
@@ -95,15 +93,12 @@ func (p *StakingProcessor) Process(ctx context.Context, receipt *sdk.TxResponse)
 }
 
 func (p *StakingProcessor) processMsgDelegate(ctx context.Context, receipt *sdk.TxResponse, msg *stakingTypes.MsgDelegate) {
-	amt := new(big.Float).SetInt(msg.Amount.Amount.BigInt())
-	amt = amt.Quo(amt, new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), common.AsaDecimalsBigInt, nil)))
-	amtFloat, _ := amt.Float64()
-
+	amtFloat := common.GetNormalizedValue(msg.Amount.Amount.BigInt())
 	if amtFloat >= p.cfg.MinAmount {
 		err := p.Whm.Alert(DelegateMsg{
 			TxMsg: processorCommon.TxMsg{
 				From:      p.ParseAccountDetail(msg.DelegatorAddress),
-				Amount:    humanize.FtoaWithDigits(amtFloat, 5),
+				Amount:    common.FormatAmount(amtFloat),
 				Token:     "0x",
 				TokenName: "ASA",
 				TxHash:    receipt.TxHash,
@@ -117,15 +112,12 @@ func (p *StakingProcessor) processMsgDelegate(ctx context.Context, receipt *sdk.
 }
 
 func (p *StakingProcessor) processMsgUndelegate(ctx context.Context, receipt *sdk.TxResponse, msg *stakingTypes.MsgUndelegate) {
-	amt := new(big.Float).SetInt(msg.Amount.Amount.BigInt())
-	amt = amt.Quo(amt, new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), common.AsaDecimalsBigInt, nil)))
-	amtFloat, _ := amt.Float64()
-
+	amtFloat := common.GetNormalizedValue(msg.Amount.Amount.BigInt())
 	if amtFloat >= p.cfg.MinAmount {
 		err := p.Whm.Alert(UndelegateMsg{
 			TxMsg: processorCommon.TxMsg{
 				From:      p.ParseAccountDetail(msg.DelegatorAddress),
-				Amount:    humanize.FtoaWithDigits(amtFloat, 5),
+				Amount:    common.FormatAmount(amtFloat),
 				Token:     "0x",
 				TokenName: "ASA",
 				TxHash:    receipt.TxHash,

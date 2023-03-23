@@ -1,14 +1,25 @@
 package cosmos
 
-import "github.com/LampardNguyen234/whale-alert/logger"
+import (
+	"context"
+	"github.com/LampardNguyen234/whale-alert/db"
+	"github.com/LampardNguyen234/whale-alert/internal/store"
+	"github.com/LampardNguyen234/whale-alert/logger"
+)
 
 var (
-	c *CosmosClient
+	c   *CosmosClient
+	ctx = context.Background()
 )
 
 func init() {
-	var err error
-	c, err = NewCosmosClient(DefaultConfig(), nil, logger.NewZeroLogger(""))
+	tmpDb, err := db.NewLvlDB("./lvldbdata")
+	if err != nil {
+		panic(err)
+	}
+	s := store.NewStore(tmpDb)
+
+	c, err = NewCosmosClient(DefaultConfig(), s, logger.NewZeroLogger(""))
 	if err != nil {
 		panic(err)
 	}
