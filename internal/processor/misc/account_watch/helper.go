@@ -22,9 +22,7 @@ func (p *AccountWatchProcessor) getTxMonitoredDetails(from, to string) (string, 
 		to = toDetail.String()
 	}
 	if fromDetail != nil && toDetail != nil {
-		if fromDetail.String() == toDetail.String() {
-			d = directionSelf
-		}
+		d = directionBothWay
 	}
 
 	return from, to, d, true

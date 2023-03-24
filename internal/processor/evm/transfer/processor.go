@@ -80,7 +80,7 @@ func (p *TransferProcessor) Process(ctx context.Context, receipt *types.Receipt)
 	}
 
 	amtFloat := common.GetNormalizedValue(tx.Value())
-	if triggerredAmt, ok := p.cfg.WhaleDefinition[common.AsaAddress]; ok && amtFloat >= triggerredAmt {
+	if tokenDetail, ok := p.Db.GetAllTokenDetails()[common.AsaAddress]; ok && amtFloat >= tokenDetail.WhaleDefinition {
 		from := ""
 		p.Log.Debugf("chainID: %v", tx.ChainId())
 		signer, err := types.Sender(types.LatestSignerForChainID(tx.ChainId()), tx)
@@ -95,8 +95,8 @@ func (p *TransferProcessor) Process(ctx context.Context, receipt *types.Receipt)
 				From:      p.ParseAccountDetail(from),
 				To:        p.ParseAccountDetail(tx.To().String()),
 				Amount:    common.FormatAmount(amtFloat),
-				Token:     "0x",
-				TokenName: "ASA",
+				Token:     tokenDetail.TokenAddress,
+				TokenName: tokenDetail.TokenName,
 				TxHash:    receipt.TxHash.String(),
 			},
 		}.String())

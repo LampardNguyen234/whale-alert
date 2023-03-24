@@ -92,7 +92,7 @@ func (p *StakingProcessor) Process(ctx context.Context, receipt *sdk.TxResponse)
 
 func (p *StakingProcessor) processMsgDelegate(ctx context.Context, receipt *sdk.TxResponse, msg *stakingTypes.MsgDelegate) {
 	amtFloat := common.GetNormalizedValue(msg.Amount.Amount.BigInt())
-	if amtFloat >= p.cfg.MinAmount {
+	if amtFloat >= p.Db.GetTokenDetail(common.AsaAddress).WhaleDefinition {
 		err := p.Whm.Alert(DelegateMsg{
 			TxMsg: processorCommon.TxMsg{
 				From:      p.ParseAccountDetail(msg.DelegatorAddress),
@@ -111,7 +111,7 @@ func (p *StakingProcessor) processMsgDelegate(ctx context.Context, receipt *sdk.
 
 func (p *StakingProcessor) processMsgUndelegate(ctx context.Context, receipt *sdk.TxResponse, msg *stakingTypes.MsgUndelegate) {
 	amtFloat := common.GetNormalizedValue(msg.Amount.Amount.BigInt())
-	if amtFloat >= p.cfg.MinAmount {
+	if amtFloat >= p.Db.GetTokenDetail(common.AsaAddress).WhaleDefinition {
 		err := p.Whm.Alert(UndelegateMsg{
 			TxMsg: processorCommon.TxMsg{
 				From:      p.ParseAccountDetail(msg.DelegatorAddress),

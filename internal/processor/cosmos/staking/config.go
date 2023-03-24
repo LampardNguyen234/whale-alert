@@ -7,15 +7,11 @@ import (
 
 type StakingProcessorConfig struct {
 	common.BaseConfig
-	QueueSize uint    `json:"QueueSize"`
-	MinAmount float64 `json:"MinAmount"`
 }
 
 func DefaultConfig() StakingProcessorConfig {
 	return StakingProcessorConfig{
-		BaseConfig: common.BaseConfig{Enabled: true},
-		QueueSize:  1024,
-		MinAmount:  0,
+		BaseConfig: common.BaseConfig{Enabled: true, QueueSize: 1024},
 	}
 }
 

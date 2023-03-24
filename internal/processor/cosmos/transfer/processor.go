@@ -78,13 +78,14 @@ func (p *TransferProcessor) Process(_ context.Context, receipt *sdk.TxResponse) 
 		}
 
 		amtFloat := common.GetNormalizedValue(tmpMsg.Amount.AmountOf(cosmos.Denom).BigInt())
-		if amtFloat >= p.cfg.MinAmount {
+		tokenDetail := p.Db.GetTokenDetail(common.AsaAddress)
+		if amtFloat >= tokenDetail.WhaleDefinition {
 			err := p.Whm.Alert(Msg{
 				From:      p.ParseAccountDetail(tmpMsg.FromAddress),
 				To:        p.ParseAccountDetail(tmpMsg.ToAddress),
 				Amount:    common.FormatAmount(amtFloat),
-				Token:     "0x",
-				TokenName: "ASA",
+				Token:     tokenDetail.TokenAddress,
+				TokenName: tokenDetail.TokenName,
 				TxHash:    receipt.TxHash,
 			}.String())
 			if err != nil {

@@ -113,14 +113,19 @@ func (p *AccountWatchProcessor) processEVMTxs(ctx context.Context, receipt *type
 		}
 
 		to := tx.To().String()
-		from := processorCommon.MustGetEvmTxSender(tx)
+		from := p.EvmClient.MustGetEvmTxSender(tx)
 		from, to, direction, isMonitored := p.getTxMonitoredDetails(from, to)
 		if !isMonitored {
 			return nil
 		}
-		acc := to
-		if direction == directionOut {
-			acc = from
+		acc := make([]string, 0)
+		switch direction {
+		case directionIn:
+			acc = []string{to}
+		case directionOut:
+			acc = []string{from}
+		default:
+			acc = []string{from, to}
 		}
 
 		return p.Whm.Alert(Msg{
@@ -153,9 +158,14 @@ func (p *AccountWatchProcessor) processCosmosTxs(_ context.Context, receipt *sdk
 			if !isMonitored {
 				return nil
 			}
-			acc := to
-			if direction == directionOut {
-				acc = from
+			acc := make([]string, 0)
+			switch direction {
+			case directionIn:
+				acc = []string{to}
+			case directionOut:
+				acc = []string{from}
+			default:
+				acc = []string{from, to}
 			}
 
 			err := p.Whm.Alert(Msg{
