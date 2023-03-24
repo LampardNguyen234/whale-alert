@@ -29,6 +29,10 @@ func (s *HTTPServer) startHandler() {
 	accountGroup.GET("/all", s.APIAuthenticateHandler(), s.apiGetAllAccountDetail)
 	accountGroup.GET("/all-monitored", s.APIAuthenticateHandler(), s.apiGetAllMonitoredAccounts)
 
+	tokenGroup := adminGroup.Group("/token")
+	tokenGroup.POST("/update", s.APIAuthenticateHandler(), s.apiUpdateTokenDetail)
+	tokenGroup.GET("/all", s.APIAuthenticateHandler(), s.apiGetAllTokenDetail)
+
 	err := s.Engine.Run("0.0.0.0:12321")
 	if err != nil {
 		s.log.Panicf("%v", err)
@@ -136,4 +140,66 @@ func (s *HTTPServer) apiGetAllMonitoredAccounts(c *gin.Context) {
 	}
 
 	resp.Result = allAccounts
+}
+
+// apiUpdateTokenDetail godoc
+// @Summary Update Token Detail
+// @Description Store the detail of a token
+// @Accept json
+// @Param request body request.APIUpdateTokenDetail true "Request body"
+// @Produce json
+// @Success 200 {object} response.APIResponse.
+// @Security ApiKeyAuth
+// @Router  /admin/token/update [post]
+func (s *HTTPServer) apiUpdateTokenDetail(c *gin.Context) {
+	var err error
+	statusCode := http.StatusOK
+	defer func() {
+		var resp string
+		if err == nil {
+			resp = "ok"
+		}
+		c.JSON(statusCode, response.NewAPIJSONResponse(c, resp, err))
+	}()
+
+	var req request.APIUpdateTokenDetail
+	err = c.MustBindWith(&req, binding.JSON)
+	if err != nil {
+		s.log.Errorf("Bind request error: %v", err)
+		statusCode = http.StatusBadRequest
+		return
+	}
+
+	_, err = common.AccountAddressToHex(req.TokenAddress)
+	if err != nil {
+		s.log.Errorf("Invalid address %v: err", req.TokenAddress, err)
+		statusCode = http.StatusBadRequest
+		err = fmt.Errorf("invalid address %v", req.TokenAddress)
+	}
+
+	go func() {
+		err = s.db.UpdateTokenDetail(store.TokenDetail(req))
+		if err != nil {
+			s.log.Errorf("failed to store token detail %v: %v", req, err)
+		}
+	}()
+}
+
+// apiGetAllAccountDetail godoc
+// @Summary Get all token details
+// @Description Get all stored token details.
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.APIResponse.
+// @Security ApiKeyAuth
+// @Router  /admin/token/all [get]
+func (s *HTTPServer) apiGetAllTokenDetail(c *gin.Context) {
+	var err error
+	statusCode := http.StatusOK
+	resp := response.APIAllTokenDetailResponse{}
+	defer func() {
+		c.JSON(statusCode, response.NewAPIJSONResponse(c, resp, err))
+	}()
+
+	resp.Result = s.db.GetAllTokenDetails()
 }
