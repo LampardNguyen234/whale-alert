@@ -14,6 +14,17 @@ definitions:
     - address
     - name
     type: object
+  request.APIUpdateTokenDetail:
+    properties:
+      Decimals:
+        type: integer
+      TokenAddress:
+        type: string
+      TokenName:
+        type: string
+      WhaleDefinition:
+        type: number
+    type: object
   response.APIResponse:
     properties:
       data: {}
@@ -81,6 +92,43 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update Account Detail
+  /admin/token/all:
+    get:
+      consumes:
+      - application/json
+      description: Get all stored token details.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all token details
+  /admin/token/update:
+    post:
+      consumes:
+      - application/json
+      description: Store the detail of a token
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.APIUpdateTokenDetail'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update Token Detail
 securityDefinitions:
   ApiKeyAuth:
     description: Use for admin authorization

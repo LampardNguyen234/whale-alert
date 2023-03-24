@@ -104,6 +104,67 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/admin/token/all": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all stored token details.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get all token details",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/token/update": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Store the detail of a token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Update Token Detail",
+                "parameters": [
+                    {
+                        "description": "Request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.APIUpdateTokenDetail"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -125,6 +186,23 @@ const docTemplate = `{
                 "name": {
                     "description": "Name is the identity of the account.",
                     "type": "string"
+                }
+            }
+        },
+        "request.APIUpdateTokenDetail": {
+            "type": "object",
+            "properties": {
+                "Decimals": {
+                    "type": "integer"
+                },
+                "TokenAddress": {
+                    "type": "string"
+                },
+                "TokenName": {
+                    "type": "string"
+                },
+                "WhaleDefinition": {
+                    "type": "number"
                 }
             }
         },
