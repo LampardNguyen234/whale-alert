@@ -1,29 +1,73 @@
 package store
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/LampardNguyen234/whale-alert/db"
+	"github.com/LampardNguyen234/whale-alert/internal/common"
+	"github.com/syndtr/goleveldb/leveldb/util"
+	"strings"
 )
 
 type TokenDetail struct {
-	TokenName    string `json:"TokenName"`
-	TokenAddress string `json:"TokenAddress"`
-	Decimals     int    `json:"Decimals"`
+	TokenName       string  `json:"TokenName,omitempty"`
+	TokenAddress    string  `json:"TokenAddress"`
+	Decimals        int     `json:"Decimals"`
+	WhaleDefinition float64 `json:"WhaleDefinition,omitempty"`
 }
 
-// StoreTokenDetail stores the detail of a token
-func (s *Store) StoreTokenDetail(d TokenDetail) error {
+func (s *Store) UpdateTokenDetail(d TokenDetail) error {
+	err := s.storeTokenDetail(d)
+	if err != nil {
+		return err
+	}
+
+	s.mtx.Lock()
+	defer s.mtx.Unlock()
+	s.allTokens[d.TokenAddress] = d
+
+	return nil
+}
+
+func (s *Store) GetTokenDetail(tokenAddress string) TokenDetail {
+	s.mtx.Lock()
+	defer s.mtx.Unlock()
+
+	return s.allTokens[tokenAddress]
+}
+
+func (s *Store) GetAllTokenDetails() map[string]TokenDetail {
+	s.mtx.Lock()
+	defer s.mtx.Unlock()
+
+	ret := make(map[string]TokenDetail)
+	for token, d := range s.allTokens {
+		ret[token] = d
+	}
+
+	return ret
+}
+
+// storeTokenDetail stores the detail of a token
+func (s *Store) storeTokenDetail(d TokenDetail) error {
+	address := strings.Replace(d.TokenAddress, "0x", "", -1)
+	address = strings.Replace(address, "0X", "", -1)
+	addressBytes, err := hex.DecodeString(address)
 	jsb, err := json.Marshal(d)
 	if err != nil {
 		return err
 	}
 
-	return s.db.SetByKey(makeKey(tokenDetailKey, []byte(d.TokenAddress)...), jsb)
+	return s.db.SetByKey(makeKey(tokenDetailKey, addressBytes...), jsb)
 }
 
-// GetTokenDetail retrieves the detail of a token.
-func (s *Store) GetTokenDetail(tokenAddress string) (*TokenDetail, error) {
-	data, err := s.db.GetByKey(makeKey(tokenDetailKey, []byte(tokenAddress)...))
+// getTokenDetail retrieves the detail of a token.
+func (s *Store) getTokenDetail(tokenAddress string) (*TokenDetail, error) {
+	address := strings.Replace(tokenAddress, "0x", "", -1)
+	address = strings.Replace(address, "0X", "", -1)
+	addressBytes, err := hex.DecodeString(address)
+	data, err := s.db.GetByKey(makeKey(tokenDetailKey, addressBytes...))
 	if err != nil {
 		return nil, err
 	}
@@ -38,4 +82,40 @@ func (s *Store) GetTokenDetail(tokenAddress string) (*TokenDetail, error) {
 	}
 
 	return &ret, nil
+}
+
+// getAllTokenDetails retrieves all saved tokens details.
+func (s *Store) getAllTokenDetails() (map[string]TokenDetail, error) {
+	levelDB, ok := s.db.(*db.LevelDB)
+	if !ok {
+		return nil, fmt.Errorf("method not supported")
+	}
+	iter := levelDB.DB.NewIterator(util.BytesPrefix(makePrefix(addressDetailKey)), nil)
+	res := make(map[string]TokenDetail)
+	for iter.Next() {
+		var d TokenDetail
+		err := json.Unmarshal(iter.Value(), &d)
+		if err != nil {
+			return nil, err
+		}
+		res[d.TokenAddress] = d
+	}
+	iter.Release()
+	err := iter.Error()
+	if err != nil {
+		return nil, fmt.Errorf("iteration error: %v", err)
+	}
+
+	return res, nil
+}
+
+func defaultTokenDetails() map[string]TokenDetail {
+	return map[string]TokenDetail{
+		common.AsaAddress: {
+			TokenName:       "ASA",
+			TokenAddress:    common.AsaAddress,
+			Decimals:        common.AsaDecimals,
+			WhaleDefinition: 1000,
+		},
+	}
 }

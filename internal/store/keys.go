@@ -14,7 +14,6 @@ const (
 	processedTxKey
 	tokenDetailKey
 	addressDetailKey
-	monitoredAddressKey
 )
 
 func makePrefix(keyPrefix int) []byte {
