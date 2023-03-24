@@ -2,6 +2,10 @@ package staking
 
 import (
 	"context"
+	"math/big"
+	"sync"
+	"time"
+
 	"github.com/LampardNguyen234/whale-alert/internal/clients/cosmos"
 	"github.com/LampardNguyen234/whale-alert/internal/common"
 	processorCommon "github.com/LampardNguyen234/whale-alert/internal/processor/common"
@@ -10,9 +14,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/dustin/go-humanize"
-	"math/big"
-	"sync"
-	"time"
 )
 
 type StakingProcessor struct {
@@ -103,7 +104,7 @@ func (p *StakingProcessor) processMsgDelegate(ctx context.Context, receipt *sdk.
 		err := p.Whm.Alert(DelegateMsg{
 			TxMsg: processorCommon.TxMsg{
 				From:      p.ParseAccountDetail(msg.DelegatorAddress),
-				Amount:    humanize.FtoaWithDigits(amtFloat, 5),
+				Amount:    humanize.FormatFloat("#,###.##",amtFloat),
 				Token:     "0x",
 				TokenName: "ASA",
 				TxHash:    receipt.TxHash,
@@ -125,7 +126,7 @@ func (p *StakingProcessor) processMsgUndelegate(ctx context.Context, receipt *sd
 		err := p.Whm.Alert(UndelegateMsg{
 			TxMsg: processorCommon.TxMsg{
 				From:      p.ParseAccountDetail(msg.DelegatorAddress),
-				Amount:    humanize.FtoaWithDigits(amtFloat, 5),
+				Amount:    humanize.FormatFloat("#,###.##",amtFloat),
 				Token:     "0x",
 				TokenName: "ASA",
 				TxHash:    receipt.TxHash,

@@ -2,6 +2,10 @@ package transfer
 
 import (
 	"context"
+	"math/big"
+	"sync"
+	"time"
+
 	"github.com/LampardNguyen234/whale-alert/internal/clients/cosmos"
 	"github.com/LampardNguyen234/whale-alert/internal/common"
 	processorCommon "github.com/LampardNguyen234/whale-alert/internal/processor/common"
@@ -10,9 +14,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bankTypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/dustin/go-humanize"
-	"math/big"
-	"sync"
-	"time"
 )
 
 type TransferProcessor struct {
@@ -87,7 +88,7 @@ func (p *TransferProcessor) Process(_ context.Context, receipt *sdk.TxResponse) 
 			return p.Whm.Alert(Msg{
 				From:      p.ParseAccountDetail(tmpMsg.FromAddress),
 				To:        p.ParseAccountDetail(tmpMsg.ToAddress),
-				Amount:    humanize.FtoaWithDigits(amtFloat, 5),
+				Amount:    humanize.FormatFloat("#,###.##",amtFloat),
 				Token:     "0x",
 				TokenName: "ASA",
 				TxHash:    receipt.TxHash,

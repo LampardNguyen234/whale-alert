@@ -2,6 +2,10 @@ package transfer
 
 import (
 	"context"
+	"math/big"
+	"sync"
+	"time"
+
 	"github.com/LampardNguyen234/whale-alert/internal/clients/evm"
 	"github.com/LampardNguyen234/whale-alert/internal/common"
 	processorCommon "github.com/LampardNguyen234/whale-alert/internal/processor/common"
@@ -9,9 +13,6 @@ import (
 	"github.com/LampardNguyen234/whale-alert/logger"
 	"github.com/dustin/go-humanize"
 	"github.com/ethereum/go-ethereum/core/types"
-	"math/big"
-	"sync"
-	"time"
 )
 
 type TransferProcessor struct {
@@ -99,7 +100,7 @@ func (p *TransferProcessor) Process(ctx context.Context, receipt *types.Receipt)
 			processorCommon.TxMsg{
 				From:      p.ParseAccountDetail(from),
 				To:        p.ParseAccountDetail(tx.To().String()),
-				Amount:    humanize.FtoaWithDigits(amtFloat, 5),
+				Amount:    humanize.FormatFloat("#,###.##",amtFloat),
 				Token:     "0x",
 				TokenName: "ASA",
 				TxHash:    receipt.TxHash.String(),
