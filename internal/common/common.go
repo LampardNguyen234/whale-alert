@@ -32,10 +32,6 @@ func GetNormalizedValue(rawValue *big.Int, decimals ...int) float64 {
 	return amtFloat
 }
 
-func FormatAmount(amt float64, digits ...int) string {
-	digit := DecimalDigits
-	if len(digits) > 0 {
-		digit = digits[0]
-	}
-	return humanize.FtoaWithDigits(amt, digit)
+func FormatAmount(amt float64) string {
+	return humanize.FormatFloat("#,###.##", amt)
 }
