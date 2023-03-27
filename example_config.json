@@ -32,12 +32,11 @@
   },
   "Clients": {
     "Evm": {
-      "Endpoint": "ws://127.0.0.1:8546",
+      "Endpoint": "http://127.0.0.1:8544",
       "Enabled": true
     },
     "Cosmos": {
       "Endpoint": "http://127.0.0.1",
-      "GrpcPort": "9090",
       "TendermintPort": "26657",
       "Prefix": "astra",
       "ChainID": "astra-11115_1",
@@ -53,21 +52,22 @@
   "Processors": {
     "EvmTransfer": {
       "Enabled": true,
-      "QueueSize": 1024,
-      "WhaleDefinition": {
-        "0x0000000000000000000000000000000000000000": 100
-      }
+      "QueueSize": 1024
     },
     "Cosmos": {
       "Transfer": {
         "Enabled": true,
-        "QueueSize": 1024,
-        "MinAmount": 100
+        "QueueSize": 1024
       },
       "Staking": {
         "Enabled": true,
-        "QueueSize": 1024,
-        "MinAmount": 0
+        "QueueSize": 1024
+      }
+    },
+    "Misc": {
+      "AccountWatch": {
+        "Enabled": true,
+        "QueueSize": 1024
       }
     }
   }
