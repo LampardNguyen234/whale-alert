@@ -191,17 +191,26 @@ const docTemplate = `{
         },
         "request.APIUpdateTokenDetail": {
             "type": "object",
+            "required": [
+                "Decimals",
+                "TokenAddress",
+                "TokenName"
+            ],
             "properties": {
                 "Decimals": {
+                    "description": "Decimals is the number of decimal places of the token.",
                     "type": "integer"
                 },
                 "TokenAddress": {
+                    "description": "TokenAddress is the EVM address of the token.",
                     "type": "string"
                 },
                 "TokenName": {
+                    "description": "TokenName is the name of the token.",
                     "type": "string"
                 },
                 "WhaleDefinition": {
+                    "description": "WhaleDefinition is the amount to trigger the whale alerts.",
                     "type": "number"
                 }
             }

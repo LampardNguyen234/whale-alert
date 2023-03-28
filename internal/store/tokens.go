@@ -11,9 +11,16 @@ import (
 )
 
 type TokenDetail struct {
-	TokenName       string  `json:"TokenName,omitempty"`
-	TokenAddress    string  `json:"TokenAddress"`
-	Decimals        int     `json:"Decimals"`
+	// TokenName is the name of the token.
+	TokenName string `json:"TokenName,omitempty" binding:"required"`
+
+	// TokenAddress is the EVM address of the token.
+	TokenAddress string `json:"TokenAddress" binding:"required"`
+
+	// Decimals is the number of decimal places of the token.
+	Decimals int `json:"Decimals" binding:"required"`
+
+	// WhaleDefinition is the amount to trigger the whale alerts.
 	WhaleDefinition float64 `json:"WhaleDefinition,omitempty"`
 }
 
