@@ -23,9 +23,10 @@ func Run(args []string) error {
 		EnableBashCompletion: true,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  flagConfig,
-				Value: "./config.json",
-				Usage: "The config file to load from",
+				Name:    flagConfig,
+				Value:   "./config.json",
+				Usage:   "The config file to load from",
+				EnvVars: []string{"CONFIG_FILE"},
 			},
 		},
 		Action: func(ctx *cli.Context) error {
