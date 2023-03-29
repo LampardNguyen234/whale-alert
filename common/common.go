@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	internalCommon "github.com/LampardNguyen234/whale-alert/internal/common"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"strings"
@@ -13,6 +14,9 @@ func FormatMDLink(msg string, link string) string {
 }
 
 func AccountAddressToHex(addr string) (string, error) {
+	if addr == internalCommon.AsaAddress {
+		return addr, nil
+	}
 	if strings.HasPrefix(addr, sdk.GetConfig().GetBech32AccountAddrPrefix()) {
 		// Check to see if address is Cosmos bech32 formatted
 		toAddr, err := sdk.AccAddressFromBech32(addr)

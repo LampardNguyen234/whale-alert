@@ -122,7 +122,7 @@ func defaultTokenDetails() map[string]TokenDetail {
 			TokenName:       "ASA",
 			TokenAddress:    common.AsaAddress,
 			Decimals:        common.AsaDecimals,
-			WhaleDefinition: 1000,
+			WhaleDefinition: 10000,
 		},
 	}
 }

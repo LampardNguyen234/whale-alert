@@ -175,6 +175,7 @@ func (s *HTTPServer) apiUpdateTokenDetail(c *gin.Context) {
 		s.log.Errorf("Invalid address %v: err", req.TokenAddress, err)
 		statusCode = http.StatusBadRequest
 		err = fmt.Errorf("invalid address %v", req.TokenAddress)
+		return
 	}
 
 	go func() {
