@@ -4,12 +4,34 @@ definitions:
       address:
         description: Address is either an EVM or Cosmos address of the account.
         type: string
+      monitored:
+        description: Monitored indicates whether the service should monitor this account.
+        type: boolean
       name:
         description: Name is the identity of the account.
         type: string
     required:
     - address
     - name
+    type: object
+  request.APIUpdateTokenDetail:
+    properties:
+      Decimals:
+        description: Decimals is the number of decimal places of the token.
+        type: integer
+      TokenAddress:
+        description: TokenAddress is the EVM address of the token.
+        type: string
+      TokenName:
+        description: TokenName is the name of the token.
+        type: string
+      WhaleDefinition:
+        description: WhaleDefinition is the amount to trigger the whale alerts.
+        type: number
+    required:
+    - Decimals
+    - TokenAddress
+    - TokenName
     type: object
   response.APIResponse:
     properties:
@@ -30,7 +52,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Check the status of a message given its ID.
+      description: Get all stored account details.
       produces:
       - application/json
       responses:
@@ -40,7 +62,22 @@ paths:
             $ref: '#/definitions/response.APIResponse'
       security:
       - ApiKeyAuth: []
-      summary: Message Status
+      summary: Get all account details
+  /admin/account/all-monitored:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all the monitored accounts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all monitored accounts
   /admin/account/update:
     post:
       consumes:
@@ -63,6 +100,43 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update Account Detail
+  /admin/token/all:
+    get:
+      consumes:
+      - application/json
+      description: Get all stored token details.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all token details
+  /admin/token/update:
+    post:
+      consumes:
+      - application/json
+      description: Store the detail of a token
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.APIUpdateTokenDetail'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update Token Detail
 securityDefinitions:
   ApiKeyAuth:
     description: Use for admin authorization

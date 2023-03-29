@@ -13,6 +13,16 @@ type AccountDetail struct {
 	Address string `json:"Address"`
 
 	Name string `json:"Name"`
+
+	Monitored bool `json:"Monitored,omitempty"`
+}
+
+func (d AccountDetail) String() string {
+	if d.Name == "" {
+		return d.Address
+	}
+
+	return fmt.Sprintf("%v (%v...%v)", d.Name, d.Address[:10], d.Address[len(d.Address)-10:])
 }
 
 // StoreAccountDetail stores the given AccountDetail to db.
@@ -45,7 +55,7 @@ func (s *Store) GetAccountDetail(address string) (*AccountDetail, error) {
 		return nil, err
 	}
 	if len(data) == 0 {
-		return nil, nil
+		return nil, fmt.Errorf("no account found")
 	}
 
 	var detail AccountDetail
@@ -80,4 +90,35 @@ func (s *Store) GetAllAccountDetails() ([]AccountDetail, error) {
 	}
 
 	return res, nil
+}
+
+// IsAccountMonitored checks if the given address is monitored.
+func (s *Store) IsAccountMonitored(address string) (bool, error) {
+	account, err := s.GetAccountDetail(address)
+	if err != nil {
+		return false, err
+	}
+
+	return account.Monitored, nil
+}
+
+// GetAllMonitoredAccounts retrieves all monitored account.
+func (s *Store) GetAllMonitoredAccounts() (map[string]*AccountDetail, error) {
+	allAccounts, err := s.GetAllAccountDetails()
+	if err != nil {
+		return nil, err
+	}
+
+	ret := make(map[string]*AccountDetail)
+	for _, account := range allAccounts {
+		if account.Monitored {
+			ret[account.Address] = &AccountDetail{
+				Address:   account.Address,
+				Name:      account.Name,
+				Monitored: account.Monitored,
+			}
+		}
+	}
+
+	return ret, nil
 }

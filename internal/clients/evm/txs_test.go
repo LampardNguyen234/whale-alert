@@ -6,6 +6,16 @@ import (
 	"testing"
 )
 
+func TestEvmClient_TransactionReceipt(t *testing.T) {
+	receipt, err := c.TransactionReceipt(ctx, common.HexToHash("0xe030621498492ac16ccddb94b2cd634554621a5088617ed0498a9fe65f21081a"))
+	if err != nil {
+		panic(err)
+	}
+
+	jsb, _ := json.MarshalIndent(receipt, "", "\t")
+	c.log.Infof(string(jsb))
+}
+
 func TestEvmClient_ListenToTxs(t *testing.T) {
 	receiptChan := make(chan interface{})
 	go c.ListenToTxs(ctx, receiptChan, nil)

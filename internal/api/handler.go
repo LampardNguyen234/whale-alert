@@ -27,6 +27,11 @@ func (s *HTTPServer) startHandler() {
 	accountGroup := adminGroup.Group("/account")
 	accountGroup.POST("/update", s.APIAuthenticateHandler(), s.apiUpdateAccountDetail)
 	accountGroup.GET("/all", s.APIAuthenticateHandler(), s.apiGetAllAccountDetail)
+	accountGroup.GET("/all-monitored", s.APIAuthenticateHandler(), s.apiGetAllMonitoredAccounts)
+
+	tokenGroup := adminGroup.Group("/token")
+	tokenGroup.POST("/update", s.APIAuthenticateHandler(), s.apiUpdateTokenDetail)
+	tokenGroup.GET("/all", s.APIAuthenticateHandler(), s.apiGetAllTokenDetail)
 
 	err := s.Engine.Run("0.0.0.0:12321")
 	if err != nil {
@@ -72,8 +77,9 @@ func (s *HTTPServer) apiUpdateAccountDetail(c *gin.Context) {
 
 	go func() {
 		d := store.AccountDetail{
-			Address: addr,
-			Name:    req.Name,
+			Address:   addr,
+			Name:      req.Name,
+			Monitored: req.Monitored,
 		}
 		err = s.db.StoreAccountDetail(d)
 		if err != nil {
@@ -83,8 +89,8 @@ func (s *HTTPServer) apiUpdateAccountDetail(c *gin.Context) {
 }
 
 // apiGetAllAccountDetail godoc
-// @Summary Message Status
-// @Description Check the status of a message given its ID.
+// @Summary Get all account details
+// @Description Get all stored account details.
 // @Accept json
 // @Produce json
 // @Success 200 {object} response.APIResponse.
@@ -107,4 +113,93 @@ func (s *HTTPServer) apiGetAllAccountDetail(c *gin.Context) {
 	}
 
 	resp.Result = allAccounts
+}
+
+// apiGetAllMonitoredAccounts godoc
+// @Summary Get all monitored accounts
+// @Description Retrieve all the monitored accounts
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.APIResponse.
+// @Security ApiKeyAuth
+// @Router  /admin/account/all-monitored [get]
+func (s *HTTPServer) apiGetAllMonitoredAccounts(c *gin.Context) {
+	var err error
+	statusCode := http.StatusOK
+	resp := response.APIAllMonitoredAccountResponse{}
+	defer func() {
+		c.JSON(statusCode, response.NewAPIJSONResponse(c, resp, err))
+	}()
+
+	allAccounts, err := s.db.GetAllMonitoredAccounts()
+	if err != nil {
+		s.log.Errorf("failed to GetAllAccountDetails: %v", err)
+		statusCode = http.StatusBadRequest
+		err = fmt.Errorf("internal server error")
+		return
+	}
+
+	resp.Result = allAccounts
+}
+
+// apiUpdateTokenDetail godoc
+// @Summary Update Token Detail
+// @Description Store the detail of a token
+// @Accept json
+// @Param request body request.APIUpdateTokenDetail true "Request body"
+// @Produce json
+// @Success 200 {object} response.APIResponse.
+// @Security ApiKeyAuth
+// @Router  /admin/token/update [post]
+func (s *HTTPServer) apiUpdateTokenDetail(c *gin.Context) {
+	var err error
+	statusCode := http.StatusOK
+	defer func() {
+		var resp string
+		if err == nil {
+			resp = "ok"
+		}
+		c.JSON(statusCode, response.NewAPIJSONResponse(c, resp, err))
+	}()
+
+	var req request.APIUpdateTokenDetail
+	err = c.MustBindWith(&req, binding.JSON)
+	if err != nil {
+		s.log.Errorf("Bind request error: %v", err)
+		statusCode = http.StatusBadRequest
+		return
+	}
+
+	_, err = common.AccountAddressToHex(req.TokenAddress)
+	if err != nil {
+		s.log.Errorf("Invalid address %v: err", req.TokenAddress, err)
+		statusCode = http.StatusBadRequest
+		err = fmt.Errorf("invalid address %v", req.TokenAddress)
+	}
+
+	go func() {
+		err = s.db.UpdateTokenDetail(store.TokenDetail(req))
+		if err != nil {
+			s.log.Errorf("failed to store token detail %v: %v", req, err)
+		}
+	}()
+}
+
+// apiGetAllAccountDetail godoc
+// @Summary Get all token details
+// @Description Get all stored token details.
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.APIResponse.
+// @Security ApiKeyAuth
+// @Router  /admin/token/all [get]
+func (s *HTTPServer) apiGetAllTokenDetail(c *gin.Context) {
+	var err error
+	statusCode := http.StatusOK
+	resp := response.APIAllTokenDetailResponse{}
+	defer func() {
+		c.JSON(statusCode, response.NewAPIJSONResponse(c, resp, err))
+	}()
+
+	resp.Result = s.db.GetAllTokenDetails()
 }

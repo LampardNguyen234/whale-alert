@@ -7,15 +7,11 @@ import (
 
 type TransferProcessorConfig struct {
 	common.BaseConfig
-	QueueSize uint    `json:"QueueSize"`
-	MinAmount float64 `json:"MinAmount"`
 }
 
 func DefaultConfig() TransferProcessorConfig {
 	return TransferProcessorConfig{
-		BaseConfig: common.BaseConfig{Enabled: true},
-		QueueSize:  1024,
-		MinAmount:  100,
+		BaseConfig: common.BaseConfig{Enabled: true, QueueSize: 1024},
 	}
 }
 

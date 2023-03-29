@@ -7,17 +7,11 @@ import (
 
 type TransferProcessorConfig struct {
 	common.BaseConfig
-	QueueSize       uint               `json:"QueueSize"`
-	WhaleDefinition map[string]float64 `json:"WhaleDefinition"`
 }
 
 func DefaultConfig() TransferProcessorConfig {
 	return TransferProcessorConfig{
-		BaseConfig: common.BaseConfig{Enabled: true},
-		QueueSize:  1024,
-		WhaleDefinition: map[string]float64{
-			common.AsaAddress: 100,
-		},
+		BaseConfig: common.BaseConfig{Enabled: true, QueueSize: 1024},
 	}
 }
 

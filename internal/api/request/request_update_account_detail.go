@@ -9,6 +9,9 @@ type APIUpdateAccountDetail struct {
 
 	// Name is the identity of the account.
 	Name string `json:"name" binding:"required" validate:"required"`
+
+	// Monitored indicates whether the service should monitor this account.
+	Monitored bool `json:"monitored"`
 }
 
 func (req *APIUpdateAccountDetail) IsValid() (bool, error) {

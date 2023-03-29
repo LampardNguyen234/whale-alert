@@ -31,6 +31,10 @@ func (f *MsgFormatter) FormatTitle(title string) *MsgFormatter {
 }
 
 func (f *MsgFormatter) FormatKeyValueMsg(key string, value interface{}) *MsgFormatter {
+	if valStr, ok := value.(string); ok && valStr == "" {
+		return f
+	}
+
 	f.resp = f.resp + fmt.Sprintf("%v: %v\n", strcase.ToCamel(key), value)
 	return f
 }

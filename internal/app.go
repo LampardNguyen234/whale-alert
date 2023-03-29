@@ -44,6 +44,10 @@ func NewApp(cfg *config.Config) (*App, error) {
 		return nil, err
 	}
 	tmpStore := store.NewStore(levelDb)
+	err = tmpStore.Init()
+	if err != nil {
+		return nil, err
+	}
 
 	tmpClients, err := clients.NewClientsFromConfig(cfg.Clients, tmpStore, log)
 	if err != nil {

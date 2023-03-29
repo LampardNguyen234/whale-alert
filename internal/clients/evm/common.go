@@ -1,10 +1,8 @@
-package common
+package evm
 
-import (
-	"github.com/ethereum/go-ethereum/core/types"
-)
+import "github.com/ethereum/go-ethereum/core/types"
 
-func MustGetEvmTxSender(tx *types.Transaction) string {
+func (c *EvmClient) MustGetEvmTxSender(tx *types.Transaction) string {
 	signer, err := types.Sender(types.LatestSignerForChainID(tx.ChainId()), tx)
 	if err != nil {
 		return ""

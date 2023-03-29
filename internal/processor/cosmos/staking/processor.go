@@ -9,8 +9,6 @@ import (
 	"github.com/LampardNguyen234/whale-alert/logger"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/dustin/go-humanize"
-	"math/big"
 	"sync"
 	"time"
 )
@@ -74,20 +72,18 @@ func (p *StakingProcessor) Start(ctx context.Context) {
 func (p *StakingProcessor) Process(ctx context.Context, receipt *sdk.TxResponse) error {
 	messages := receipt.GetTx().GetMsgs()
 	for _, msg := range messages {
-		tmpMsgDelegate, ok := msg.(*stakingTypes.MsgDelegate)
-		if ok {
+		switch msg.(type) {
+		case *stakingTypes.MsgDelegate:
+			tmpMsgDelegate := msg.(*stakingTypes.MsgDelegate)
 			go p.processMsgDelegate(ctx, receipt, tmpMsgDelegate)
-			continue
-		}
-
-		tmpMsgUndelegate, ok := msg.(*stakingTypes.MsgUndelegate)
-		if ok {
+		case *stakingTypes.MsgUndelegate:
+			tmpMsgUndelegate := msg.(*stakingTypes.MsgUndelegate)
 			go p.processMsgUndelegate(ctx, receipt, tmpMsgUndelegate)
-		}
-
-		tmpMsgCreateValidator, ok := msg.(*stakingTypes.MsgCreateValidator)
-		if ok {
+		case *stakingTypes.MsgCreateValidator:
+			tmpMsgCreateValidator := msg.(*stakingTypes.MsgCreateValidator)
 			go p.processMsgCreateValidator(ctx, receipt, tmpMsgCreateValidator)
+		default:
+			return nil
 		}
 	}
 
@@ -95,15 +91,12 @@ func (p *StakingProcessor) Process(ctx context.Context, receipt *sdk.TxResponse)
 }
 
 func (p *StakingProcessor) processMsgDelegate(ctx context.Context, receipt *sdk.TxResponse, msg *stakingTypes.MsgDelegate) {
-	amt := new(big.Float).SetInt(msg.Amount.Amount.BigInt())
-	amt = amt.Quo(amt, new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), common.AsaDecimalsBigInt, nil)))
-	amtFloat, _ := amt.Float64()
-
-	if amtFloat >= p.cfg.MinAmount {
+	amtFloat := common.GetNormalizedValue(msg.Amount.Amount.BigInt())
+	if amtFloat >= p.Db.GetTokenDetail(common.AsaAddress).WhaleDefinition {
 		err := p.Whm.Alert(DelegateMsg{
 			TxMsg: processorCommon.TxMsg{
 				From:      p.ParseAccountDetail(msg.DelegatorAddress),
-				Amount:    humanize.FtoaWithDigits(amtFloat, 5),
+				Amount:    common.FormatAmount(amtFloat),
 				Token:     "0x",
 				TokenName: "ASA",
 				TxHash:    receipt.TxHash,
@@ -117,15 +110,12 @@ func (p *StakingProcessor) processMsgDelegate(ctx context.Context, receipt *sdk.
 }
 
 func (p *StakingProcessor) processMsgUndelegate(ctx context.Context, receipt *sdk.TxResponse, msg *stakingTypes.MsgUndelegate) {
-	amt := new(big.Float).SetInt(msg.Amount.Amount.BigInt())
-	amt = amt.Quo(amt, new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), common.AsaDecimalsBigInt, nil)))
-	amtFloat, _ := amt.Float64()
-
-	if amtFloat >= p.cfg.MinAmount {
+	amtFloat := common.GetNormalizedValue(msg.Amount.Amount.BigInt())
+	if amtFloat >= p.Db.GetTokenDetail(common.AsaAddress).WhaleDefinition {
 		err := p.Whm.Alert(UndelegateMsg{
 			TxMsg: processorCommon.TxMsg{
 				From:      p.ParseAccountDetail(msg.DelegatorAddress),
-				Amount:    humanize.FtoaWithDigits(amtFloat, 5),
+				Amount:    common.FormatAmount(amtFloat),
 				Token:     "0x",
 				TokenName: "ASA",
 				TxHash:    receipt.TxHash,
@@ -143,7 +133,7 @@ func (p *StakingProcessor) processMsgCreateValidator(_ context.Context, receipt 
 		TxMsg: processorCommon.TxMsg{
 			TxHash: receipt.TxHash,
 		},
-		Address:    msg.ValidatorAddress,
+		Address:    parseValidatorDetail(msg.ValidatorAddress, msg.Description),
 		Name:       msg.Description.Moniker,
 		Commission: msg.Commission.Rate.MustFloat64(),
 	}.String())

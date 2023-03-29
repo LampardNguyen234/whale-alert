@@ -18,14 +18,39 @@
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Check the status of a message given its ID.",
+                "description": "Get all stored account details.",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Message Status",
+                "summary": "Get all account details",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/account/all-monitored": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve all the monitored accounts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get all monitored accounts",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -71,6 +96,67 @@
                     }
                 }
             }
+        },
+        "/admin/token/all": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all stored token details.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get all token details",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/token/update": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Store the detail of a token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Update Token Detail",
+                "parameters": [
+                    {
+                        "description": "Request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.APIUpdateTokenDetail"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.APIResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -85,9 +171,39 @@
                     "description": "Address is either an EVM or Cosmos address of the account.",
                     "type": "string"
                 },
+                "monitored": {
+                    "description": "Monitored indicates whether the service should monitor this account.",
+                    "type": "boolean"
+                },
                 "name": {
                     "description": "Name is the identity of the account.",
                     "type": "string"
+                }
+            }
+        },
+        "request.APIUpdateTokenDetail": {
+            "type": "object",
+            "required": [
+                "Decimals",
+                "TokenAddress",
+                "TokenName"
+            ],
+            "properties": {
+                "Decimals": {
+                    "description": "Decimals is the number of decimal places of the token.",
+                    "type": "integer"
+                },
+                "TokenAddress": {
+                    "description": "TokenAddress is the EVM address of the token.",
+                    "type": "string"
+                },
+                "TokenName": {
+                    "description": "TokenName is the name of the token.",
+                    "type": "string"
+                },
+                "WhaleDefinition": {
+                    "description": "WhaleDefinition is the amount to trigger the whale alerts.",
+                    "type": "number"
                 }
             }
         },
