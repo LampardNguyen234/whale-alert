@@ -5,19 +5,22 @@ import (
 	"github.com/LampardNguyen234/whale-alert/internal/processor/cosmos"
 	evmTransfer "github.com/LampardNguyen234/whale-alert/internal/processor/evm/transfer"
 	"github.com/LampardNguyen234/whale-alert/internal/processor/misc"
+	tiki_exchange "github.com/LampardNguyen234/whale-alert/internal/processor/tiki_exchage"
 )
 
 type ProcessorsConfig struct {
-	EvmTransfer evmTransfer.TransferProcessorConfig `json:"EvmTransfer"`
-	Cosmos      cosmos.CosmosProcessorConfig        `json:"Cosmos"`
-	Misc        misc.MiscProcessorConfig            `json:"Misc"`
+	EvmTransfer  evmTransfer.TransferProcessorConfig `json:"EvmTransfer"`
+	Cosmos       cosmos.CosmosProcessorConfig        `json:"Cosmos"`
+	Misc         misc.MiscProcessorConfig            `json:"Misc"`
+	TikiExchange tiki_exchange.TikiProcessorConfig   `json:"TikiExchange"`
 }
 
 func DefaultConfig() ProcessorsConfig {
 	return ProcessorsConfig{
-		EvmTransfer: evmTransfer.DefaultConfig(),
-		Cosmos:      cosmos.DefaultConfig(),
-		Misc:        misc.DefaultConfig(),
+		EvmTransfer:  evmTransfer.DefaultConfig(),
+		Cosmos:       cosmos.DefaultConfig(),
+		Misc:         misc.DefaultConfig(),
+		TikiExchange: tiki_exchange.DefaultConfig(),
 	}
 }
 
@@ -30,6 +33,9 @@ func (cfg ProcessorsConfig) IsValid() (bool, error) {
 	}
 	if _, err := cfg.Misc.IsValid(); err != nil {
 		return false, fmt.Errorf("invalid Misc: %v", err)
+	}
+	if _, err := cfg.TikiExchange.IsValid(); err != nil {
+		return false, fmt.Errorf("invalid TikiExchange: %v", err)
 	}
 
 	return true, nil

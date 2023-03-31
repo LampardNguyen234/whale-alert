@@ -8,7 +8,7 @@ type BaseConfig struct {
 }
 
 func (cfg BaseConfig) IsValid() (bool, error) {
-	if cfg.QueueSize == 0 {
+	if cfg.Enabled && cfg.QueueSize == 0 {
 		return false, fmt.Errorf("empty queueSize")
 	}
 
