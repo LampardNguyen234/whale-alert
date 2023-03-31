@@ -1,11 +1,11 @@
 package store
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/LampardNguyen234/whale-alert/db"
 	"github.com/LampardNguyen234/whale-alert/internal/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/syndtr/goleveldb/leveldb/util"
 	"strings"
 )
@@ -58,9 +58,7 @@ func (s *Store) GetAllTokenDetails() map[string]TokenDetail {
 
 // storeTokenDetail stores the detail of a token
 func (s *Store) storeTokenDetail(d TokenDetail) error {
-	address := strings.Replace(d.TokenAddress, "0x", "", -1)
-	address = strings.Replace(address, "0X", "", -1)
-	addressBytes, err := hex.DecodeString(address)
+	addressBytes := tokenAddressToBytes(d.TokenAddress)
 	jsb, err := json.Marshal(d)
 	if err != nil {
 		return err
@@ -71,9 +69,7 @@ func (s *Store) storeTokenDetail(d TokenDetail) error {
 
 // getTokenDetail retrieves the detail of a token.
 func (s *Store) getTokenDetail(tokenAddress string) (*TokenDetail, error) {
-	address := strings.Replace(tokenAddress, "0x", "", -1)
-	address = strings.Replace(address, "0X", "", -1)
-	addressBytes, err := hex.DecodeString(address)
+	addressBytes := tokenAddressToBytes(tokenAddress)
 	data, err := s.db.GetByKey(makeKey(tokenDetailKey, addressBytes...))
 	if err != nil {
 		return nil, err
@@ -125,4 +121,14 @@ func defaultTokenDetails() map[string]TokenDetail {
 			WhaleDefinition: 10000,
 		},
 	}
+}
+
+func tokenAddressToBytes(address string) []byte {
+	address = strings.ToLower(address)
+	address = strings.Replace(address, "0x", "", -1)
+	if address == "" {
+		address = common.AsaAddress
+	}
+
+	return crypto.Keccak256([]byte(address))[:]
 }
