@@ -23,7 +23,7 @@ func (s *HTTPServer) APIAuthenticateHandler() gin.HandlerFunc {
 			unauthorized(c, http.StatusUnauthorized, err.Error())
 			return
 		}
-		s.log.Infof("New request from %v", c.ClientIP())
+		s.log.Infof("New request from %v, path %v", c.ClientIP(), c.Request.URL.Path)
 
 		if strings.ToLower(
 			fmt.Sprintf("%x", sha256.Sum256([]byte(token.Authorization))),
