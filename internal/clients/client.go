@@ -5,6 +5,7 @@ import (
 	"github.com/LampardNguyen234/whale-alert/internal/clients/common"
 	"github.com/LampardNguyen234/whale-alert/internal/clients/cosmos"
 	"github.com/LampardNguyen234/whale-alert/internal/clients/evm"
+	"github.com/LampardNguyen234/whale-alert/internal/clients/tiki"
 	"github.com/LampardNguyen234/whale-alert/internal/store"
 	"github.com/LampardNguyen234/whale-alert/logger"
 	"math/big"
@@ -30,6 +31,10 @@ func NewClientsFromConfig(cfg ClientsConfig, store *store.Store, log logger.Logg
 			return nil, err
 		}
 		ret[common.CosmosClientName] = cosmosClient
+	}
+	if cfg.TikiExchange.Enabled {
+		tikiClient := tiki.NewTikiClient(cfg.TikiExchange, log)
+		ret[common.TikiExchangeClientName] = tikiClient
 	}
 
 	common.InitExplorer(cfg.Cosmos.ChainID)
