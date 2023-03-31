@@ -101,7 +101,10 @@ func (s *Store) getAllTokenDetails() (map[string]TokenDetail, error) {
 		if err != nil {
 			return nil, err
 		}
-		res[d.TokenAddress] = d
+		if d.TokenAddress != "" {
+			res[d.TokenAddress] = d
+		}
+
 	}
 	iter.Release()
 	err := iter.Error()
