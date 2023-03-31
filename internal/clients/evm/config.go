@@ -16,7 +16,7 @@ func DefaultConfig() EvmClientConfig {
 
 // IsValid checks if the current EvmClientConfig is valid.
 func (cfg EvmClientConfig) IsValid() (bool, error) {
-	if cfg.Endpoint == "" {
+	if cfg.Enabled && cfg.Endpoint == "" {
 		return false, fmt.Errorf("empty endpoint")
 	}
 
