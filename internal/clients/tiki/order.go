@@ -64,7 +64,7 @@ func (c *TikiClient) GetOrders(ctx context.Context, limits ...int) ([]Order, err
 	for _, order := range tmpRet {
 		order.CreatedAt = time.Unix(order.At, 0)
 		order.Side = OrderBuyType
-		if order.TakerType == OrderBuyType {
+		if order.TakerType == OrderSellType {
 			order.Side = OrderSellType
 		}
 		ret = append(ret, *order.Order)
