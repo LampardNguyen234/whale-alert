@@ -6,11 +6,13 @@ import (
 )
 
 const (
-	EvmClientName    = "EVM"
-	CosmosClientName = "COSMOS"
+	EvmClientName          = "EVM"
+	CosmosClientName       = "COSMOS"
+	TikiExchangeClientName = "TIKI"
 
-	EvmClientID    = 0
-	CosmosClientID = 1
+	EvmClientID          = 0
+	CosmosClientID       = 1
+	TikiExchangeClientID = 2
 )
 
 var Explorer ExplorerDetail

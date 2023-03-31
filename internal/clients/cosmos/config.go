@@ -22,6 +22,9 @@ func DefaultConfig() CosmosClientConfig {
 
 // IsValid checks if the current CosmosClientConfig is valid.
 func (cfg CosmosClientConfig) IsValid() (bool, error) {
+	if !cfg.Enabled {
+		return true, nil
+	}
 	if cfg.Endpoint == "" {
 		return false, fmt.Errorf("empty endpoint")
 	}
