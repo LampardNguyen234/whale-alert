@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"github.com/LampardNguyen234/whale-alert/db"
 	"github.com/LampardNguyen234/whale-alert/internal/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	ethCommon "github.com/ethereum/go-ethereum/common"
 	"github.com/syndtr/goleveldb/leveldb/util"
+	"math"
 	"strings"
 )
 
@@ -30,30 +31,34 @@ func (s *Store) UpdateTokenDetail(d TokenDetail) error {
 		return err
 	}
 
-	s.mtx.Lock()
-	defer s.mtx.Unlock()
-	s.allTokens[d.TokenAddress] = d
-
+	s.cachedTokens.SetDefault(d.TokenAddress, d)
 	return nil
 }
 
 func (s *Store) GetTokenDetail(tokenAddress string) TokenDetail {
-	s.mtx.Lock()
-	defer s.mtx.Unlock()
-
-	return s.allTokens[tokenAddress]
-}
-
-func (s *Store) GetAllTokenDetails() map[string]TokenDetail {
-	s.mtx.Lock()
-	defer s.mtx.Unlock()
-
-	ret := make(map[string]TokenDetail)
-	for token, d := range s.allTokens {
-		ret[token] = d
+	resp, exists := s.cachedTokens.Get(tokenAddress)
+	if !exists {
+		return TokenDetail{
+			WhaleDefinition: math.MaxFloat64,
+		}
 	}
 
-	return ret
+	return resp.(TokenDetail)
+}
+
+func (s *Store) GetAllTokenDetails() (map[string]TokenDetail, error) {
+	resp, err := s.getAllTokenDetails()
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		for addr, d := range resp {
+			s.cachedTokens.SetDefault(addr, d)
+		}
+	}()
+
+	return resp, err
 }
 
 // storeTokenDetail stores the detail of a token
@@ -93,7 +98,7 @@ func (s *Store) getAllTokenDetails() (map[string]TokenDetail, error) {
 	if !ok {
 		return nil, fmt.Errorf("method not supported")
 	}
-	iter := levelDB.DB.NewIterator(util.BytesPrefix(makePrefix(addressDetailKey)), nil)
+	iter := levelDB.DB.NewIterator(util.BytesPrefix(makePrefix(tokenDetailKey)), nil)
 	res := make(map[string]TokenDetail)
 	for iter.Next() {
 		var d TokenDetail
@@ -101,7 +106,10 @@ func (s *Store) getAllTokenDetails() (map[string]TokenDetail, error) {
 		if err != nil {
 			return nil, err
 		}
-		res[d.TokenAddress] = d
+		if d.TokenAddress != "" {
+			res[d.TokenAddress] = d
+		}
+
 	}
 	iter.Release()
 	err := iter.Error()
@@ -114,9 +122,9 @@ func (s *Store) getAllTokenDetails() (map[string]TokenDetail, error) {
 
 func defaultTokenDetails() map[string]TokenDetail {
 	return map[string]TokenDetail{
-		common.AsaAddress: {
+		common.ZeroAddress: {
 			TokenName:       "ASA",
-			TokenAddress:    common.AsaAddress,
+			TokenAddress:    common.ZeroAddress,
 			Decimals:        common.AsaDecimals,
 			WhaleDefinition: 10000,
 		},
@@ -125,10 +133,22 @@ func defaultTokenDetails() map[string]TokenDetail {
 
 func tokenAddressToBytes(address string) []byte {
 	address = strings.ToLower(address)
-	address = strings.Replace(address, "0x", "", -1)
+	address = zeroPad(address, 64)
 	if address == "" {
-		address = common.AsaAddress
+		address = common.ZeroAddress
 	}
 
-	return crypto.Keccak256([]byte(address))[:]
+	addr := ethCommon.HexToAddress(address)
+
+	return addr.Bytes()
+}
+
+func zeroPad(in string, size int) string {
+	in = strings.Replace(in, "0x", "", -1)
+	in = strings.Replace(in, "0X", "", -1)
+	for len(in) < size {
+		in = "0" + in
+	}
+
+	return in
 }

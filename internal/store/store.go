@@ -1,23 +1,24 @@
 package store
 
 import (
+	"fmt"
+	"github.com/LampardNguyen234/whale-alert/common"
 	"github.com/LampardNguyen234/whale-alert/db"
-	"sync"
 )
 
 type Store struct {
-	db        db.KeyValueReaderWriter
-	allTokens map[string]TokenDetail
-	mtx       *sync.Mutex
+	db           db.KeyValueReaderWriter
+	cachedTokens common.Cache
 }
 
 // NewStore creates a new Store with the given db.
 func NewStore(db db.KeyValueReaderWriter) *Store {
-	return &Store{db: db, allTokens: make(map[string]TokenDetail), mtx: new(sync.Mutex)}
+	return &Store{db: db, cachedTokens: common.NewSimpleCache()}
 }
 
 func (s *Store) Init() error {
 	allTokens, err := s.getAllTokenDetails()
+	fmt.Println("allTokens:", allTokens)
 	if err != nil || len(allTokens) == 0 {
 		allTokens = defaultTokenDetails()
 		for _, d := range allTokens {
@@ -28,6 +29,9 @@ func (s *Store) Init() error {
 		}
 	}
 
-	s.allTokens = allTokens
+	for addr, d := range allTokens {
+		s.cachedTokens.SetDefault(addr, d)
+	}
+
 	return nil
 }
