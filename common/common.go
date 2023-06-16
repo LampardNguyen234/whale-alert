@@ -14,17 +14,38 @@ func FormatMDLink(msg string, link string) string {
 }
 
 func AccountAddressToHex(addr string) (string, error) {
-	if addr == internalCommon.AsaAddress {
-		return addr, nil
+	ethAddr, err := AccountAddressToEthAddr(addr)
+	if err != nil {
+		return "", err
+	}
+
+	return ethAddr.Hex(), nil
+}
+
+// MustAccountAddressToHex is the same as AccountAddressToHex except that it will panic upon errors.
+func MustAccountAddressToHex(addr string) string {
+	addr, err := AccountAddressToHex(addr)
+	if err != nil {
+		panic(err)
+	}
+
+	return addr
+}
+
+// AccountAddressToEthAddr parses the given address to an ETH address.
+func AccountAddressToEthAddr(addr string) (common.Address, error) {
+	zeroAddr := common.HexToAddress(addr)
+	if addr == internalCommon.ZeroAddress {
+		return zeroAddr, nil
 	}
 	if strings.HasPrefix(addr, sdk.GetConfig().GetBech32AccountAddrPrefix()) {
 		// Check to see if address is Cosmos bech32 formatted
 		toAddr, err := sdk.AccAddressFromBech32(addr)
 		if err != nil {
-			return "", fmt.Errorf("%v is not a valid Bech32 address", addr)
+			return zeroAddr, fmt.Errorf("%v is not a valid Bech32 address", addr)
 		}
 		ethAddr := common.BytesToAddress(toAddr.Bytes())
-		return ethAddr.Hex(), nil
+		return ethAddr, nil
 	}
 
 	if !strings.HasPrefix(addr, "0x") {
@@ -33,20 +54,10 @@ func AccountAddressToHex(addr string) (string, error) {
 
 	valid := common.IsHexAddress(addr)
 	if !valid {
-		return "", fmt.Errorf("%s is not a valid Ethereum or Cosmos address", addr)
+		return zeroAddr, fmt.Errorf("%s is not a valid Ethereum or Cosmos address", addr)
 	}
 
 	ethAddr := common.HexToAddress(addr)
 
-	return ethAddr.Hex(), nil
-}
-
-// MustAccountAddressToHex creates
-func MustAccountAddressToHex(addr string) string {
-	addr, err := AccountAddressToHex(addr)
-	if err != nil {
-		return addr
-	}
-
-	return addr
+	return ethAddr, nil
 }

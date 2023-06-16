@@ -1,12 +1,11 @@
 package store
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/LampardNguyen234/whale-alert/common"
 	"github.com/LampardNguyen234/whale-alert/db"
 	"github.com/syndtr/goleveldb/leveldb/util"
-	"strings"
 )
 
 type AccountDetail struct {
@@ -19,7 +18,7 @@ type AccountDetail struct {
 
 func (d AccountDetail) String() string {
 	if d.Name == "" {
-		return d.Address
+		return fmt.Sprintf("%v", d.Address)
 	}
 
 	return fmt.Sprintf("%v (%v...%v)", d.Name, d.Address[:10], d.Address[len(d.Address)-10:])
@@ -27,9 +26,7 @@ func (d AccountDetail) String() string {
 
 // StoreAccountDetail stores the given AccountDetail to db.
 func (s *Store) StoreAccountDetail(detail AccountDetail) error {
-	address := strings.Replace(detail.Address, "0x", "", -1)
-	address = strings.Replace(address, "0X", "", -1)
-	addressBytes, err := hex.DecodeString(address)
+	addr, err := common.AccountAddressToEthAddr(detail.Address)
 	if err != nil {
 		return err
 	}
@@ -38,19 +35,17 @@ func (s *Store) StoreAccountDetail(detail AccountDetail) error {
 	if err != nil {
 		return err
 	}
-	return s.db.SetByKey(makeKey(addressDetailKey, addressBytes...), jsb)
+	return s.db.SetByKey(makeKey(addressDetailKey, addr.Bytes()...), jsb)
 }
 
 // GetAccountDetail retrieves the detail of an Account given its address.
 func (s *Store) GetAccountDetail(address string) (*AccountDetail, error) {
-	address = strings.Replace(address, "0x", "", -1)
-	address = strings.Replace(address, "0X", "", -1)
-	addressBytes, err := hex.DecodeString(address)
+	addr, err := common.AccountAddressToEthAddr(address)
 	if err != nil {
 		return nil, err
 	}
 
-	data, err := s.db.GetByKey(makeKey(addressDetailKey, addressBytes...))
+	data, err := s.db.GetByKey(makeKey(addressDetailKey, addr.Bytes()...))
 	if err != nil {
 		return nil, err
 	}

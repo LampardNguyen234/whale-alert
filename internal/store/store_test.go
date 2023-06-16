@@ -14,4 +14,9 @@ func init() {
 	}
 
 	s = NewStore(lvlDB)
+
+	err = s.Init()
+	if err != nil {
+		panic(err)
+	}
 }

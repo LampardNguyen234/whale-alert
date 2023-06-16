@@ -63,14 +63,14 @@ func (s *HTTPServer) apiUpdateAccountDetail(c *gin.Context) {
 	var req request.APIUpdateAccountDetail
 	err = c.MustBindWith(&req, binding.JSON)
 	if err != nil {
-		s.log.Errorf("Bind request error: %v", err)
+		s.log.Errorf("failed to bind request: %v", err)
 		statusCode = http.StatusBadRequest
 		return
 	}
 
 	addr, err := common.AccountAddressToHex(req.Address)
 	if err != nil {
-		s.log.Errorf("Invalid address %v: err", req.Address, err)
+		s.log.Errorf("invalid address %v: err", req.Address, err)
 		statusCode = http.StatusBadRequest
 		err = fmt.Errorf("invalid address %v", req.Address)
 	}
@@ -153,7 +153,7 @@ func (s *HTTPServer) apiGetAllMonitoredAccounts(c *gin.Context) {
 // @Router  /admin/token/update [post]
 func (s *HTTPServer) apiUpdateTokenDetail(c *gin.Context) {
 	var err error
-	statusCode := http.StatusOK
+	statusCode := http.StatusBadRequest
 	defer func() {
 		var resp string
 		if err == nil {
@@ -165,18 +165,21 @@ func (s *HTTPServer) apiUpdateTokenDetail(c *gin.Context) {
 	var req request.APIUpdateTokenDetail
 	err = c.MustBindWith(&req, binding.JSON)
 	if err != nil {
-		s.log.Errorf("Bind request error: %v", err)
-		statusCode = http.StatusBadRequest
+		s.log.Errorf("failed to bind request: %v", err)
+		return
+	}
+	if _, err = req.IsValid(); err != nil {
 		return
 	}
 
-	_, err = common.AccountAddressToHex(req.TokenAddress)
+	addr, err := common.AccountAddressToEthAddr(req.TokenAddress)
 	if err != nil {
-		s.log.Errorf("Invalid address %v: err", req.TokenAddress, err)
-		statusCode = http.StatusBadRequest
+		s.log.Errorf("invalid address %v: err", req.TokenAddress, err)
 		err = fmt.Errorf("invalid address %v", req.TokenAddress)
 		return
 	}
+	req.TokenAddress = addr.Hex()
+	statusCode = http.StatusOK
 
 	go func() {
 		err = s.db.UpdateTokenDetail(store.TokenDetail(req))
@@ -196,11 +199,17 @@ func (s *HTTPServer) apiUpdateTokenDetail(c *gin.Context) {
 // @Router  /admin/token/all [get]
 func (s *HTTPServer) apiGetAllTokenDetail(c *gin.Context) {
 	var err error
-	statusCode := http.StatusOK
+	statusCode := http.StatusBadRequest
 	resp := response.APIAllTokenDetailResponse{}
 	defer func() {
 		c.JSON(statusCode, response.NewAPIJSONResponse(c, resp, err))
 	}()
 
-	resp.Result = s.db.GetAllTokenDetails()
+	resp.Result, err = s.db.GetAllTokenDetails()
+	if err != nil {
+		s.log.Errorf("failed to get all token details: %v", err)
+		return
+	}
+
+	statusCode = http.StatusOK
 }
