@@ -46,7 +46,7 @@ func (c *CosmosClient) ListenToTxs(ctx context.Context, txResult chan interface{
 
 			txs, err := c.BlockTxsByHeight(ctx, currentBlk)
 			if err != nil {
-				c.log.Errorf("failed to get blockTxsByHeight(%v): %v", startBlk.Uint64(), err)
+				c.log.Errorf("failed to get blockTxsByHeight(%v): %v", currentBlk.Uint64(), err)
 				continue
 			}
 			for _, tmpTx := range txs {
