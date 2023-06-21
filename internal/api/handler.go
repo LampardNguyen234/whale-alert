@@ -73,6 +73,7 @@ func (s *HTTPServer) apiUpdateAccountDetail(c *gin.Context) {
 		s.log.Errorf("invalid address %v: err", req.Address, err)
 		statusCode = http.StatusBadRequest
 		err = fmt.Errorf("invalid address %v", req.Address)
+		return
 	}
 
 	go func() {
