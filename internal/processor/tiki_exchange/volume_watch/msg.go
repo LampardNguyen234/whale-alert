@@ -22,8 +22,9 @@ func (msg Msg) String() string {
 	}
 	msgFormatter := new(processorCommon.MsgFormatter).
 		FormatTitle("Tiki Volume Watching").
-		FormatMsg(fmt.Sprintf("%v ASAs have been traded in the last %v. TotalSell: %v, TotalBuy: %v.",
+		FormatMsg(fmt.Sprintf("%v ASAs have been traded with %v order(s) in the last %v. TotalSell: %v, TotalBuy: %v.",
 			common.FormatAmount(msg.Orders.Amount()),
+			len(msg.Orders),
 			duration,
 			common.FormatAmount(msg.Orders.AmountByType(tiki.OrderSellType)),
 			common.FormatAmount(msg.Orders.AmountByType(tiki.OrderBuyType)),
