@@ -83,7 +83,7 @@ func (p *StakingProcessor) Process(ctx context.Context, receipt *sdk.TxResponse)
 			tmpMsgCreateValidator := msg.(*stakingTypes.MsgCreateValidator)
 			go p.processMsgCreateValidator(ctx, receipt, tmpMsgCreateValidator)
 		default:
-			return nil
+			continue
 		}
 	}
 
@@ -91,6 +91,7 @@ func (p *StakingProcessor) Process(ctx context.Context, receipt *sdk.TxResponse)
 }
 
 func (p *StakingProcessor) processMsgDelegate(ctx context.Context, receipt *sdk.TxResponse, msg *stakingTypes.MsgDelegate) {
+	p.Log.Debugf("newMsgDelegate: %v", *msg)
 	amtFloat := common.GetNormalizedValue(msg.Amount.Amount.BigInt())
 	if amtFloat >= p.Db.GetTokenDetail(common.ZeroAddress).WhaleDefinition {
 		err := p.Whm.Alert(DelegateMsg{
@@ -110,6 +111,7 @@ func (p *StakingProcessor) processMsgDelegate(ctx context.Context, receipt *sdk.
 }
 
 func (p *StakingProcessor) processMsgUndelegate(ctx context.Context, receipt *sdk.TxResponse, msg *stakingTypes.MsgUndelegate) {
+	p.Log.Debugf("newMsgUnDelegate: %v", *msg)
 	amtFloat := common.GetNormalizedValue(msg.Amount.Amount.BigInt())
 	if amtFloat >= p.Db.GetTokenDetail(common.ZeroAddress).WhaleDefinition {
 		err := p.Whm.Alert(UndelegateMsg{
@@ -129,6 +131,7 @@ func (p *StakingProcessor) processMsgUndelegate(ctx context.Context, receipt *sd
 }
 
 func (p *StakingProcessor) processMsgCreateValidator(_ context.Context, receipt *sdk.TxResponse, msg *stakingTypes.MsgCreateValidator) {
+	p.Log.Debugf("newMsgCreateValidator: %v", *msg)
 	err := p.Whm.Alert(CreateValidatorMsg{
 		TxMsg: processorCommon.TxMsg{
 			TxHash: receipt.TxHash,

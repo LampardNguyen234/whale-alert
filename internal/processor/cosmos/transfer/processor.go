@@ -76,6 +76,7 @@ func (p *TransferProcessor) Process(_ context.Context, receipt *sdk.TxResponse) 
 		if !ok {
 			continue
 		}
+		p.Log.Debugf("newMsgSend: %v", *tmpMsg)
 
 		amtFloat := common.GetNormalizedValue(tmpMsg.Amount.AmountOf(cosmos.Denom).BigInt())
 		tokenDetail := p.Db.GetTokenDetail(common.ZeroAddress)
