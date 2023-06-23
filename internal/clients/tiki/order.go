@@ -3,6 +3,7 @@ package tiki
 import (
 	"context"
 	"fmt"
+	"github.com/LampardNguyen234/whale-alert/common"
 	"net/http"
 	"sort"
 	"time"
@@ -26,6 +27,52 @@ type Order struct {
 	Total     float64   `json:"total"`
 	Side      OrderType `json:"side"`
 	CreatedAt time.Time `json:"createAt"`
+}
+
+func (ord Order) Hash() common.Hash {
+	return common.Digest(
+		ord.ID,
+		ord.Price,
+		ord.Amount,
+		ord.Total,
+		ord.Side,
+		ord.CreatedAt.String(),
+	)
+}
+
+type Orders []*Order
+
+// Amount returns the total amounts of the given Orders.
+func (ord Orders) Amount() float64 {
+	tmp := []*Order(ord)
+
+	resp := float64(0)
+	for _, tmpOrd := range tmp {
+		resp += tmpOrd.Amount
+	}
+	return resp
+}
+
+func (ord Orders) ToSlice() []*Order {
+	return ord
+}
+
+func (ord Orders) Count() int {
+	return len(ord)
+}
+
+// AmountByType returns the total amounts of the given Orders by OrderType.
+func (ord Orders) AmountByType(side OrderType) float64 {
+	resp := make([]*Order, 0)
+	ords := ord.ToSlice()
+	for _, tmpOrd := range ords {
+		if tmpOrd.Side == side {
+			tmp := *tmpOrd
+			resp = append(resp, &tmp)
+		}
+	}
+
+	return Orders(resp).Amount()
 }
 
 // GetOrders returns the current newest orders on the Tiki Exchange.

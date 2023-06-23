@@ -1,7 +1,6 @@
 package store
 
 import (
-	"fmt"
 	"github.com/LampardNguyen234/whale-alert/common"
 	"github.com/LampardNguyen234/whale-alert/db"
 )
@@ -18,7 +17,6 @@ func NewStore(db db.KeyValueReaderWriter) *Store {
 
 func (s *Store) Init() error {
 	allTokens, err := s.getAllTokenDetails()
-	fmt.Println("allTokens:", allTokens)
 	if err != nil || len(allTokens) == 0 {
 		allTokens = defaultTokenDetails()
 		for _, d := range allTokens {
