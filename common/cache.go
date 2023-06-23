@@ -29,7 +29,7 @@ type SimpleCache struct {
 // NewSimpleCache creates a new SimpleCache with default expiration and cleanUpInterval.
 func NewSimpleCache() *SimpleCache {
 	return &SimpleCache{
-		Cache: cache.New(defaultExpiration, defaultCleanUpInterval),
+		Cache: cache.New(cache.NoExpiration, defaultCleanUpInterval),
 	}
 }
 
