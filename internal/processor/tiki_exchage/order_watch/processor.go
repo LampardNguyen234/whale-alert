@@ -65,6 +65,7 @@ func (p *OrderWatchProcessor) Start(ctx context.Context) {
 }
 
 func (p *OrderWatchProcessor) Process(ctx context.Context, order *tiki.Order) error {
+	p.Log.Debugf("newTikiOrder: %v, %v/%v", *order, order.Amount, p.cfg.MinAmount)
 	if order.Amount < p.cfg.MinAmount {
 		return nil
 	}
