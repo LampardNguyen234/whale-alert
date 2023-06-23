@@ -10,7 +10,7 @@ import (
 	cosmosProcessor "github.com/LampardNguyen234/whale-alert/internal/processor/cosmos"
 	evmTransfer "github.com/LampardNguyen234/whale-alert/internal/processor/evm/transfer"
 	"github.com/LampardNguyen234/whale-alert/internal/processor/misc"
-	tiki_exchange "github.com/LampardNguyen234/whale-alert/internal/processor/tiki_exchage"
+	tiki_exchange "github.com/LampardNguyen234/whale-alert/internal/processor/tiki_exchange"
 	"github.com/LampardNguyen234/whale-alert/internal/store"
 	"github.com/LampardNguyen234/whale-alert/logger"
 )
