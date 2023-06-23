@@ -78,6 +78,7 @@ func (p *TransferProcessor) Process(ctx context.Context, receipt *types.Receipt)
 		p.Log.Errorf("failed to get TransactionByHash %v: %v", receipt.TxHash, err)
 		return err
 	}
+	p.Log.Debugf("newEvmTransfer: %v, %v", tx.Hash(), tx.Value().String())
 
 	amtFloat := common.GetNormalizedValue(tx.Value())
 	if tokenDetail := p.Db.GetTokenDetail(common.ZeroAddress); amtFloat >= tokenDetail.WhaleDefinition {
