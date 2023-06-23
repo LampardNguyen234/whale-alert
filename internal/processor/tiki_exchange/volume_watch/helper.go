@@ -2,7 +2,6 @@ package volume_watch
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/LampardNguyen234/whale-alert/internal/clients/tiki"
 	"github.com/pkg/errors"
@@ -70,11 +69,6 @@ func (p *VolumeWatchProcessor) enqueueOrder(order *tiki.Order) {
 	})
 
 	p.cache.SetDefault(order.Hash().String(), true)
-	for _, ord := range p.orders {
-		jsb, _ := json.Marshal(ord)
-		p.Log.Debugf("ord: %v", string(jsb))
-	}
-
 }
 
 func (p *VolumeWatchProcessor) getOrdersFromTime(from time.Time) ([]*tiki.Order, error) {
