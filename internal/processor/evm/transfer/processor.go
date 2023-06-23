@@ -80,8 +80,9 @@ func (p *TransferProcessor) Process(ctx context.Context, receipt *types.Receipt)
 	}
 
 	amtFloat := common.GetNormalizedValue(tx.Value())
-	p.Log.Debugf("newEvmTransfer: %v, %v", tx.Hash(), amtFloat)
-	if tokenDetail := p.Db.GetTokenDetail(common.ZeroAddress); amtFloat >= tokenDetail.WhaleDefinition {
+	tokenDetail := p.Db.GetTokenDetail(common.ZeroAddress)
+	p.Log.Debugf("newEvmTransfer: %v, %v/%v", tx.Hash(), amtFloat, tokenDetail.WhaleDefinition)
+	if amtFloat >= tokenDetail.WhaleDefinition {
 		from := ""
 		p.Log.Debugf("chainID: %v", tx.ChainId())
 		signer, err := types.Sender(types.LatestSignerForChainID(tx.ChainId()), tx)
