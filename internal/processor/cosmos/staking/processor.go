@@ -79,6 +79,9 @@ func (p *StakingProcessor) Process(ctx context.Context, receipt *sdk.TxResponse)
 		case *stakingTypes.MsgUndelegate:
 			tmpMsgUndelegate := msg.(*stakingTypes.MsgUndelegate)
 			go p.processMsgUndelegate(ctx, receipt, tmpMsgUndelegate)
+		case *stakingTypes.MsgBeginRedelegate:
+			tmpMsgRedelegate := msg.(*stakingTypes.MsgBeginRedelegate)
+			go p.processMsgRedelegate(ctx, receipt, tmpMsgRedelegate)
 		case *stakingTypes.MsgCreateValidator:
 			tmpMsgCreateValidator := msg.(*stakingTypes.MsgCreateValidator)
 			go p.processMsgCreateValidator(ctx, receipt, tmpMsgCreateValidator)
@@ -125,6 +128,28 @@ func (p *StakingProcessor) processMsgUndelegate(ctx context.Context, receipt *sd
 				TxHash:    receipt.TxHash,
 			},
 			Validator: p.getValidatorName(ctx, msg.ValidatorAddress),
+		}.String())
+		if err != nil {
+			p.Log.Errorf("failed to processMsgDelegate txHash %v: %v", receipt.TxHash, err)
+		}
+	}
+}
+
+func (p *StakingProcessor) processMsgRedelegate(ctx context.Context, receipt *sdk.TxResponse, msg *stakingTypes.MsgBeginRedelegate) {
+	amtFloat := common.GetNormalizedValue(msg.Amount.Amount.BigInt())
+	tokenDetail := p.Db.GetTokenDetail(common.ZeroAddress)
+	p.Log.Debugf("newMsgRedelegate: %v, %v/%v", *msg, amtFloat, tokenDetail.WhaleDefinition)
+	if amtFloat >= p.Db.GetTokenDetail(common.ZeroAddress).WhaleDefinition {
+		err := p.Whm.Alert(BeginRedelegateMsg{
+			TxMsg: processorCommon.TxMsg{
+				From:      p.ParseAccountDetail(msg.DelegatorAddress),
+				Amount:    common.FormatAmount(amtFloat),
+				Token:     "0x",
+				TokenName: "ASA",
+				TxHash:    receipt.TxHash,
+			},
+			FromValidator: p.getValidatorName(ctx, msg.ValidatorSrcAddress),
+			ToValidator:   p.getValidatorName(ctx, msg.ValidatorDstAddress),
 		}.String())
 		if err != nil {
 			p.Log.Errorf("failed to processMsgDelegate txHash %v: %v", receipt.TxHash, err)
