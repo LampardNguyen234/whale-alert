@@ -37,6 +37,24 @@ func (msg UndelegateMsg) String() string {
 	return msgFormatter.String()
 }
 
+type BeginRedelegateMsg struct {
+	processorCommon.TxMsg
+	FromValidator string
+	ToValidator   string
+}
+
+func (msg BeginRedelegateMsg) String() string {
+	msgFormatter := new(processorCommon.MsgFormatter).
+		FormatTitle("Withdraw Staking").
+		FormatKeyValueMsg("Staker", msg.From).
+		FormatKeyValueMsg("From Validator", msg.FromValidator).
+		FormatKeyValueMsg("To Validator", msg.ToValidator).
+		FormatKeyValueMsg("Amount", msg.Amount).
+		FormatKeyValueMsg("TxHash", processorCommon.FormatTxURL(msg.TxHash))
+
+	return msgFormatter.String()
+}
+
 type CreateValidatorMsg struct {
 	processorCommon.TxMsg
 	Address    string
