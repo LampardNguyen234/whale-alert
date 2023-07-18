@@ -45,7 +45,7 @@ type BeginRedelegateMsg struct {
 
 func (msg BeginRedelegateMsg) String() string {
 	msgFormatter := new(processorCommon.MsgFormatter).
-		FormatTitle("Withdraw Staking").
+		FormatTitle("Redelegate").
 		FormatKeyValueMsg("Staker", msg.From).
 		FormatKeyValueMsg("From Validator", msg.FromValidator).
 		FormatKeyValueMsg("To Validator", msg.ToValidator).
