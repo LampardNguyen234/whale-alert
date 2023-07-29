@@ -14,3 +14,10 @@ func (cfg BaseConfig) IsValid() (bool, error) {
 
 	return true, nil
 }
+
+func DefaultBaseConfig() BaseConfig {
+	return BaseConfig{
+		true,
+		1024,
+	}
+}

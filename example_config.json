@@ -1,107 +1,129 @@
 {
-  "Logger": {
-    "LogPath": "",
-    "Level": 1,
-    "Color": false
-  },
-  "Webhooks": {
-    "Discord": {
-      "Token": "DISCORD_TOKEN",
-      "SubChannels": [
-        "CHANNEL_ID_0",
-        "CHANNEL_ID_1"
-      ],
-      "MessageQueueSize": 1024,
-      "EnabledMessageTypes": {
-        "Alert": true,
-        "Info": true
-      }
-    },
-    "Telegram": {
-      "Token": "TELEGRAM_BOT_TOKEN",
-      "SubChannels": [
-        "@CHANNEL_0",
-        "@CHANNEL_1"
-      ],
-      "MessageQueueSize": 1024,
-      "EnabledMessageTypes": {
-        "Alert": true,
-        "Info": true
-      }
-    }
-  },
-  "Clients": {
-    "Evm": {
-      "Endpoint": "http://127.0.0.1:8544",
-      "Enabled": true
-    },
-    "Cosmos": {
-      "Endpoint": "http://127.0.0.1",
-      "TendermintPort": "26657",
-      "Prefix": "astra",
-      "ChainID": "astra-11115_1",
-      "Enabled": false
-    },
-    "TikiExchange": {
-      "Endpoint": "https://api.tiki.vn/sandseel/api/v2",
-      "Enabled": true
-    }
-  },
-  "LevelDB": {
-    "Path": "./data"
-  },
-  "Listener": {
-    "StartBlock": 0
-  },
-  "Processors": {
-    "EvmTransfer": {
-      "Enabled": true,
-      "QueueSize": 1024
-    },
-    "Cosmos": {
-      "Transfer": {
-        "Enabled": true,
-        "QueueSize": 1024
-      },
-      "Staking": {
-        "Enabled": true,
-        "QueueSize": 1024
-      }
-    },
-    "Misc": {
-      "AccountWatch": {
-        "Enabled": true,
-        "QueueSize": 1024
-      }
-    },
-    "TikiExchange": {
-      "OrderWatch": {
-        "Enabled": true,
-        "QueueSize": 1024,
-        "MinAmount": 1000
-      },
-      "VolumeWatch": {
-        "Enabled": true,
-        "QueueSize": 1024,
-        "VolumeChecks": [
-          {
-            "Period": "24h0m0s",
-            "Volume": 1000000
-          },
-          {
-            "Period": "1h0m0s",
-            "Volume": 200000
-          },
-          {
-            "Period": "30m0s",
-            "Volume": 100000
-          },
-          {
-            "Period": "5m0s",
-            "Volume": 50000
-          }
-        ]
-      }
-    }
-  }
+	"Logger": {
+		"LogPath": "",
+		"Level": 1,
+		"Color": false
+	},
+	"Webhooks": {
+		"Discord": {
+			"Token": "DISCORD_TOKEN",
+			"SubChannels": [
+				"CHANNEL_ID_0",
+				"CHANNEL_ID_1"
+			],
+			"MessageQueueSize": 1024,
+			"EnabledMessageTypes": {
+				"Alert": true,
+				"Info": true
+			}
+		},
+		"Telegram": {
+			"Token": "TELEGRAM_BOT_TOKEN",
+			"SubChannels": [
+				"@CHANNEL_0",
+				"@CHANNEL_1"
+			],
+			"MessageQueueSize": 1024,
+			"EnabledMessageTypes": {
+				"Alert": true,
+				"Info": true
+			}
+		}
+	},
+	"Clients": {
+		"Evm": {
+			"Endpoint": "http://127.0.0.1:8544",
+			"Enabled": true
+		},
+		"Cosmos": {
+			"Endpoint": "http://127.0.0.1",
+			"TendermintPort": "26657",
+			"Prefix": "astra",
+			"ChainID": "astra-11115_1",
+			"Enabled": false
+		},
+		"TikiExchange": {
+			"Endpoint": "https://api.tiki.vn/sandseel/api/v2",
+			"Enabled": true
+		}
+	},
+	"LevelDB": {
+		"Path": "./data"
+	},
+	"Listener": {
+		"StartBlock": 0
+	},
+	"Processors": {
+		"Evm": {
+			"Transfer": {
+				"Enabled": true,
+				"QueueSize": 1024
+			},
+			"Bridge": {
+				"Enabled": true,
+				"QueueSize": 1024,
+				"Chains": {
+					"ASA": {
+						"Name": "Astra",
+						"URL": "",
+						"FromHeight": 0,
+						"BlockInterval": 0,
+						"Bridge": "0xf188be7da55bd7b649b1f3a4eb4f038e0e87095f"
+					},
+					"BSC": {
+						"Name": "Binance Smart Chain",
+						"URL": "",
+						"FromHeight": 0,
+						"BlockInterval": 0,
+						"Bridge": "0x5fC4435AcA131f1F541D2fc67DC3A6a20d10a99d"
+					}
+				}
+			}
+		},
+		"Cosmos": {
+			"Transfer": {
+				"Enabled": true,
+				"QueueSize": 1024
+			},
+			"Staking": {
+				"Enabled": true,
+				"QueueSize": 1024
+			}
+		},
+		"Misc": {
+			"AccountWatch": {
+				"Enabled": true,
+				"QueueSize": 1024
+			}
+		},
+		"TikiExchange": {
+			"OrderWatch": {
+				"Enabled": true,
+				"QueueSize": 1024,
+				"MinAmount": 1000
+			},
+			"VolumeWatch": {
+				"Enabled": true,
+				"QueueSize": 1024,
+				"VolumeChecks": [
+					{
+						"Period": "24h0m0s",
+						"Volume": 1000000
+					},
+					{
+						"Period": "1h0m0s",
+						"Volume": 200000
+					},
+					{
+						"Period": "30m0s",
+						"Volume": 100000
+					},
+					{
+						"Period": "5m0s",
+						"Volume": 50000
+					}
+				]
+			}
+		}
+	}
 }
