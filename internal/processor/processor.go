@@ -8,7 +8,8 @@ import (
 	"github.com/LampardNguyen234/whale-alert/internal/clients/tiki"
 	processorCommon "github.com/LampardNguyen234/whale-alert/internal/processor/common"
 	cosmosProcessor "github.com/LampardNguyen234/whale-alert/internal/processor/cosmos"
-	evmTransfer "github.com/LampardNguyen234/whale-alert/internal/processor/evm/transfer"
+	evmProcessor "github.com/LampardNguyen234/whale-alert/internal/processor/evm"
+	"github.com/LampardNguyen234/whale-alert/internal/processor/evm/bridge"
 	"github.com/LampardNguyen234/whale-alert/internal/processor/misc"
 	tiki_exchange "github.com/LampardNguyen234/whale-alert/internal/processor/tiki_exchange"
 	"github.com/LampardNguyen234/whale-alert/internal/store"
@@ -28,15 +29,19 @@ func NewProcessors(cfg ProcessorsConfig,
 
 	if client, ok := blkClients[common.EvmClientName]; ok {
 		evmClient = client.(*evm.EvmClient)
-		if cfg.EvmTransfer.Enabled {
-			p, err := evmTransfer.NewTransferProcessor(cfg.EvmTransfer, evmClient, db, log)
-			if err != nil {
-				return nil, err
-			}
-
-			ret = append(ret, p)
+		processors, err := evmProcessor.NewProcessors(cfg.Evm, evmClient, db, log)
+		if err != nil {
+			return nil, err
 		}
 
+		ret = append(ret, processors...)
+	} else if cfg.Evm.Bridge.Enabled {
+		p, err := bridge.NewBridgeProcessor(cfg.Evm.Bridge, db, log)
+		if err != nil {
+			return nil, err
+		}
+
+		ret = append(ret, p)
 	}
 
 	if client, ok := blkClients[common.CosmosClientName]; ok {
