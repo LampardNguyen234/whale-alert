@@ -2,6 +2,7 @@ package staking
 
 import (
 	"context"
+	sdkCommon "github.com/LampardNguyen234/astra-go-sdk/common"
 	"github.com/LampardNguyen234/whale-alert/internal/clients/cosmos"
 	"github.com/LampardNguyen234/whale-alert/internal/common"
 	processorCommon "github.com/LampardNguyen234/whale-alert/internal/processor/common"
@@ -94,7 +95,7 @@ func (p *StakingProcessor) Process(ctx context.Context, receipt *sdk.TxResponse)
 }
 
 func (p *StakingProcessor) processMsgDelegate(ctx context.Context, receipt *sdk.TxResponse, msg *stakingTypes.MsgDelegate) {
-	amtFloat := common.GetNormalizedValue(msg.Amount.Amount.BigInt())
+	amtFloat := sdkCommon.ParseAmountToDec(msg.Amount).MustFloat64()
 	tokenDetail := p.Db.GetTokenDetail(common.ZeroAddress)
 	p.Log.Debugf("newMsgDelegate: %v, %v/%v", *msg, amtFloat, tokenDetail.WhaleDefinition)
 	if amtFloat >= tokenDetail.WhaleDefinition {
@@ -115,7 +116,7 @@ func (p *StakingProcessor) processMsgDelegate(ctx context.Context, receipt *sdk.
 }
 
 func (p *StakingProcessor) processMsgUndelegate(ctx context.Context, receipt *sdk.TxResponse, msg *stakingTypes.MsgUndelegate) {
-	amtFloat := common.GetNormalizedValue(msg.Amount.Amount.BigInt())
+	amtFloat := sdkCommon.ParseAmountToDec(msg.Amount).MustFloat64()
 	tokenDetail := p.Db.GetTokenDetail(common.ZeroAddress)
 	p.Log.Debugf("newMsgUnDelegate: %v, %v/%v", *msg, amtFloat, tokenDetail.WhaleDefinition)
 	if amtFloat >= p.Db.GetTokenDetail(common.ZeroAddress).WhaleDefinition {
@@ -136,7 +137,7 @@ func (p *StakingProcessor) processMsgUndelegate(ctx context.Context, receipt *sd
 }
 
 func (p *StakingProcessor) processMsgRedelegate(ctx context.Context, receipt *sdk.TxResponse, msg *stakingTypes.MsgBeginRedelegate) {
-	amtFloat := common.GetNormalizedValue(msg.Amount.Amount.BigInt())
+	amtFloat := sdkCommon.ParseAmountToDec(msg.Amount).MustFloat64()
 	tokenDetail := p.Db.GetTokenDetail(common.ZeroAddress)
 	p.Log.Debugf("newMsgRedelegate: %v, %v/%v", *msg, amtFloat, tokenDetail.WhaleDefinition)
 	if amtFloat >= p.Db.GetTokenDetail(common.ZeroAddress).WhaleDefinition {

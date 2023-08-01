@@ -2,6 +2,7 @@ package account_watcher
 
 import (
 	"context"
+	sdkCom "github.com/LampardNguyen234/astra-go-sdk/common"
 	"github.com/LampardNguyen234/whale-alert/internal/clients/cosmos"
 	"github.com/LampardNguyen234/whale-alert/internal/clients/evm"
 	"github.com/LampardNguyen234/whale-alert/internal/common"
@@ -132,7 +133,7 @@ func (p *AccountWatchProcessor) processEVMTxs(ctx context.Context, receipt *type
 			TxMsg: processorCommon.TxMsg{
 				From:   from,
 				To:     to,
-				Amount: common.FormatAmount(common.GetNormalizedValue(tx.Value())),
+				Amount: common.FormatAmount(sdkCom.ParseAmountToDec(sdk.NewCoin(sdkCom.BaseDenom, sdk.NewIntFromBigInt(tx.Value()))).MustFloat64()),
 				TxHash: receipt.TxHash.String(),
 			},
 			Account:   acc,

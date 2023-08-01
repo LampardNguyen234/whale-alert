@@ -1,22 +1,23 @@
 package cosmos
 
-import "fmt"
+import (
+	"fmt"
+	goClient "github.com/LampardNguyen234/astra-go-sdk/client"
+)
 
 type CosmosClientConfig struct {
-	Endpoint       string `json:"Endpoint"`
-	TendermintPort string `json:"TendermintPort"`
-	Prefix         string `json:"Prefix"`
-	ChainID        string `json:"ChainID"`
-	Enabled        bool   `json:"Enabled"`
+	goClient.CosmosClientConfig
+	Enabled bool `json:"Enabled"`
 }
 
 func DefaultConfig() CosmosClientConfig {
 	return CosmosClientConfig{
-		TendermintPort: "26657",
-		Endpoint:       "http://127.0.0.1",
-		Prefix:         "astra",
-		ChainID:        "astra-11115_1",
-		Enabled:        false,
+		CosmosClientConfig: goClient.CosmosClientConfig{
+			TendermintPort: "26657",
+			Endpoint:       "http://127.0.0.1",
+			ChainID:        "astra-11115_1",
+		},
+		Enabled: false,
 	}
 }
 

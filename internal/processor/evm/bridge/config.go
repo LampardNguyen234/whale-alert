@@ -37,12 +37,14 @@ func DefaultConfig() BridgeConfig {
 				FromHeight:    0,
 				BlockInterval: 0,
 				Bridge:        "0xf188be7da55bd7b649b1f3a4eb4f038e0e87095f",
+				Explorer:      "https://explorer.astranaut.io",
 			},
 			"BSC": {
 				Name:          "Binance Smart Chain",
 				FromHeight:    0,
 				BlockInterval: 0,
 				Bridge:        "0x5fC4435AcA131f1F541D2fc67DC3A6a20d10a99d",
+				Explorer:      "https://bscscan.com",
 			},
 		},
 	}

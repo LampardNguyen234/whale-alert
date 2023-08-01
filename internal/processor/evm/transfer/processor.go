@@ -2,11 +2,13 @@ package transfer
 
 import (
 	"context"
+	sdkCommon "github.com/LampardNguyen234/astra-go-sdk/common"
 	"github.com/LampardNguyen234/whale-alert/internal/clients/evm"
 	"github.com/LampardNguyen234/whale-alert/internal/common"
 	processorCommon "github.com/LampardNguyen234/whale-alert/internal/processor/common"
 	"github.com/LampardNguyen234/whale-alert/internal/store"
 	"github.com/LampardNguyen234/whale-alert/logger"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/core/types"
 	"sync"
 	"time"
@@ -79,7 +81,7 @@ func (p *TransferProcessor) Process(ctx context.Context, receipt *types.Receipt)
 		return err
 	}
 
-	amtFloat := common.GetNormalizedValue(tx.Value())
+	amtFloat := sdkCommon.ParseAmountToDec(sdk.NewCoin(sdkCommon.BaseDenom, sdk.NewIntFromBigInt(tx.Value()))).MustFloat64()
 	tokenDetail := p.Db.GetTokenDetail(common.ZeroAddress)
 	p.Log.Debugf("newEvmTransfer: %v, %v/%v", tx.Hash(), amtFloat, tokenDetail.WhaleDefinition)
 	if amtFloat >= tokenDetail.WhaleDefinition {
