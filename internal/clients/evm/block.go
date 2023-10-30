@@ -27,7 +27,7 @@ func (c *EvmClient) BlockTxsByHeight(ctx context.Context, blk *big.Int) ([]*type
 	for _, tx := range block.Transactions() {
 		receipt, err := c.TransactionReceipt(ctx, tx.Hash())
 		if err != nil {
-			c.log.Errorf("failed to get transaction receipt of %v: %v", tx.Hash(), err)
+			c.log.Errorf("failed to get transaction receipt of %v: %v", tx.Hash().String(), err)
 			return nil, err
 		}
 

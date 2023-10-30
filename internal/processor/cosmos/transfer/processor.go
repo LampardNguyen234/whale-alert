@@ -2,6 +2,7 @@ package transfer
 
 import (
 	"context"
+	sdkCommon "github.com/LampardNguyen234/astra-go-sdk/common"
 	"github.com/LampardNguyen234/whale-alert/internal/clients/cosmos"
 	"github.com/LampardNguyen234/whale-alert/internal/common"
 	processorCommon "github.com/LampardNguyen234/whale-alert/internal/processor/common"
@@ -76,7 +77,7 @@ func (p *TransferProcessor) Process(_ context.Context, receipt *sdk.TxResponse) 
 		if !ok {
 			continue
 		}
-		amtFloat := common.GetNormalizedValue(tmpMsg.Amount.AmountOf(cosmos.Denom).BigInt())
+		amtFloat := sdkCommon.ParseAmountToDec(tmpMsg.Amount).MustFloat64()
 		tokenDetail := p.Db.GetTokenDetail(common.ZeroAddress)
 		p.Log.Debugf("newMsgSend: %v, %v/%v", *tmpMsg, amtFloat, tokenDetail.WhaleDefinition)
 		if amtFloat >= tokenDetail.WhaleDefinition {

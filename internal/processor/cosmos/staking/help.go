@@ -6,8 +6,8 @@ import (
 	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
-func (p *StakingProcessor) getValidatorName(ctx context.Context, valAddr string) string {
-	validatorDetail, err := p.CosmosClient.GetValidatorDetail(ctx, valAddr)
+func (p *StakingProcessor) getValidatorName(_ context.Context, valAddr string) string {
+	validatorDetail, err := p.CosmosClient.GetValidatorDetail(valAddr)
 	if err == nil {
 		return parseValidatorDetail(valAddr, validatorDetail.Description)
 	}
@@ -18,8 +18,8 @@ func (p *StakingProcessor) getValidatorName(ctx context.Context, valAddr string)
 func parseValidatorDetail(valAddr string, desc stakingTypes.Description) string {
 	if desc.Moniker != "" {
 		return fmt.Sprintf("%v (%v...%v)", desc.Moniker,
-			valAddr[:12],
-			valAddr[len(valAddr)-12:],
+			valAddr[:15],
+			valAddr[len(valAddr)-15:],
 		)
 	}
 

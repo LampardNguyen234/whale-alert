@@ -4,20 +4,9 @@ import (
 	"context"
 	clientCommon "github.com/LampardNguyen234/whale-alert/internal/clients/common"
 	"github.com/LampardNguyen234/whale-alert/internal/common"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	"math/big"
 	"time"
 )
-
-func (c *CosmosClient) TxByHash(hash string) (*sdk.TxResponse, error) {
-	resp, err := tx.QueryTx(c.BaseClient.Context, hash)
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, nil
-}
 
 func (c *CosmosClient) ListenToTxs(ctx context.Context, txResult chan interface{}, startBlk *big.Int) {
 	var currentBlk *big.Int
@@ -30,7 +19,7 @@ func (c *CosmosClient) ListenToTxs(ctx context.Context, txResult chan interface{
 			c.log.Infof("ListenToTxs STOPPED")
 			return
 		default:
-			head, err := c.LatestBlockHeight(ctx)
+			head, err := c.CosmosClient.LatestBlockHeight()
 			if err != nil {
 				c.log.Error("Unable to get latest block")
 				time.Sleep(common.DefaultSleepTime)
@@ -44,7 +33,7 @@ func (c *CosmosClient) ListenToTxs(ctx context.Context, txResult chan interface{
 				continue
 			}
 
-			txs, err := c.BlockTxsByHeight(ctx, currentBlk)
+			txs, err := c.CosmosClient.BlockTxsByHeight(ctx, currentBlk)
 			if err != nil {
 				c.log.Errorf("failed to get blockTxsByHeight(%v): %v", currentBlk.Uint64(), err)
 				continue
