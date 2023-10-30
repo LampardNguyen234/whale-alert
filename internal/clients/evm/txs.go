@@ -51,6 +51,7 @@ func (c *EvmClient) ListenToTxs(ctx context.Context, txResult chan interface{}, 
 			txs, err := c.BlockTxsByHeight(ctx, currentBlk)
 			if err != nil {
 				c.log.Errorf("failed to get blockTxsByHeight(%v): %v", currentBlk.Uint64(), err)
+				time.Sleep(internalCommon.DefaultSleepTime)
 				continue
 			}
 			for _, tx := range txs {
